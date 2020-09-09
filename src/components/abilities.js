@@ -1,27 +1,31 @@
 import React from "react";
-import { connect } from "react-redux";
-import { fetchUserData } from "../redux/actions/userActions"
+import Abi from "./ability";
 
-const mapStateToProps = state => {
-    return {
-        skills: state.reducer.skills
-    };
-  }
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
 class Abis extends React.Component {
-    componentDidMount () {
-        this.props.dispatch(fetchUserData())
-    }
    
     render() {
-        const { skills } = this.props;
 
         return (
-        <div>
-            {skills.cns}
-        </div>
+        <Col md="9">
+            <Container>
+                <Row>
+                    <Abi abi="cns"/>
+                    <Abi abi="agi"/>
+                    <Abi abi="spi"/>
+                    <Abi abi="itl"/>
+                    <Abi abi="tac"/>
+                    <Abi abi="dex"/>
+                    <Abi abi="lsa"/>
+                    <Abi abi="lsd"/>
+                </Row>
+            </Container>
+        </Col>
         );
     }
 }
   
-  export default connect(mapStateToProps)(Abis)
+  export default Abis;

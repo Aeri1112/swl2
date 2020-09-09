@@ -7,18 +7,17 @@ const initialState = {
     error: null
 }
 
-const reducer = (state=initialState, action) => {
+const skills = (state=initialState, action) => {
     switch (action.type) {
         case FETCH_STATS:
             return{
                 ...state,
                 fetched: true,
                 skills: action.payload
-            }    
+            }
         default:
-            break;
+        return state;   
     }
-    return state;
 }
 
-export default reducer;
+export default skills;

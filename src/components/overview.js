@@ -1,74 +1,80 @@
 import React from "react";
-import axios from "axios";
+import { connect } from "react-redux";
+import { fetchUserChar } from "../redux/actions/userActions";
+import { fetchUserData } from "../redux/actions/userActions";
 
 import Bars from "./bars";
+import Row from "react-bootstrap/Row";
 
-class UsingAxios extends React.Component {
-    state = {
-      side: [],
-      char: [],
-      skills: []
-    }
+const mapStateToProps = state => {
+    return {
+        skills: state.skills.skills,
+        char: state.char.char
+    };
+  }
+  const dispatchProps = dispatch => ({
 
-    componentDidMount() {
-        let body = {
-            userId: 4
-            };
-        axios.post(`http://localhost/react/my-app/api/character/overview.php`, body)
-      .then(res => {
-        const side = res.data[0];
-        const char = res.data[1];
-        const skills = res.data[2];
-        this.setState({ side });
-        this.setState({ char });
-        this.setState({ skills });
-      })
+    fetchData: () => dispatch(fetchUserData()),
+    fetchChar: () => dispatch(fetchUserChar())
+
+})
+
+class Overview extends React.Component {
+
+    componentDidMount () {
+        this.props.fetchData();
+        this.props.fetchChar();
     }
 
     render() {
+        const { char, skills } = this.props;
+        console.log(this.props);
 
         return (
-
-        <div className="row">
+        <>
+        <Row>
             <div className="col-6">
                 <div>
-                    Name: { this.state.char.username }
+                    Name: { char.username }
                 </div>
                 <div>
-                    Spezies: { this.state.char.species }
+                    Spezies: { char.species }
                 </div>
                 <div>
-                    Alter: { this.state.char.age }
+                    Alter: {  }
                 </div>
                 <div>
-                    Größe: { this.state.char.size }
+                    Größe: {  } cm
                 </div>
                 <div>
-                    Heimatwelt: { this.state.char.homeworld }
+                    Heimatwelt: {  }
                 </div>
             </div> 
             <div className="col-6">
                 <div>
-                    Level: { this.state.skills.level }
+                    Level: {  }
                 </div>
                 <div>
-                    Allianz: { this.state.char.alliance }
+                    Allianz: {  }
                 </div>
                 <div>
-                    Rang: { this.state.char.rank }
+                    Rang: {  }
                 </div>
                 <div>
-                    Meister: { this.state.char.masterid }
+                    Meister: {  }
                 </div>
             </div>
+        </Row>
+
             <Bars type={"Ausrichtung"} width={"50%"} bg={""}/>
-            <Bars type={"Health"} width={ this.state.skills.health_width + "%"} bg={"bg-danger"}/>
-            <Bars type={"Mana"} width={this.state.skills.mana_width + "%"} bg={"bg-primary"}/>
-            <Bars type={"Energy"} width={this.state.skills.energy_width + "%"} bg={"bg-warning"}/>
+            <Bars type={"Health"} width={ skills.health_width + "%"} bg={"bg-danger"}/>
+            <Bars type={"Mana"} width={ skills.mana_width + "%"} bg={"bg-primary"}/>
+            <Bars type={"Energy"} width={ skills.energy_width + "%"} bg={"bg-warning"}/>
             <Bars type={"Experience"} width={"10%"} bg={"bg-success"}/>
-        </div>
+
+        </>
         );
     }
 }
 
-export default UsingAxios;
+export default connect(mapStateToProps, dispatchProps)(Overview);

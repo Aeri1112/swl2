@@ -1,0 +1,172 @@
+[
+    {
+        "id": "cns",
+        "head": "Constitution (Konstitution)",
+        "body": "Lebensenergie, Körperkraft, Ausdauer und Schadenspotential im Nahkampf"
+    },
+    {
+        "id": "agi",
+        "head": "Agility (Mobilität, Gewandheit)",
+        "body": "Wie schnell man sich fortbewegt und wie gut man Angriffe ausführt und ausweicht"
+    },
+    {
+        "id": "spi",
+        "head": "Spirit (Geist)",
+        "body": "Manapool, Machteinsatz, Einsatzgeschwindigkeit und Einsatzstärke"
+    },
+    {
+        "id": "itl",
+        "head": "Intelligence (Intelligenz, Wissen)",
+        "body": "Wichtig zum Bau von Gegenständen, entscheidet über deren Qualität. Ebenfalls benötigt für effektiven Machteinsatz. (Der prozentuale Wert in Klammern gibt den absoluten Schadensbonus auf alle Machtangriffe an.)"
+    },
+    {
+        "id": "tac",
+        "head": "Tactic (Taktik)",
+        "body": "Taktische Fähigkeiten im Kampf. Diese Fähigkeit macht nur einen geringfügigen, aber eventuell entscheidenen Unterschied."
+    },
+    {
+        "id": "dex",
+        "head": "Dexterity (Geschicklichkeit)",
+        "body": "Geschicklichkeit ist eine Grundvorraussetztung für den Einsatz von Nahkampfwaffen in Bezug auf Treffergenauigkeit und Schadenspotential. Darüberhinaus verbessert es leicht den Umgang mit Mächten und die Qualität von gebauten Gegenständen."
+    },
+    {
+        "id": "lsa",
+        "head": "Lightsaber Attack (Lichtschwert Angriff)",
+        "body": "Esentiell für die Trefferquote mit allen Nahkampfwaffen"
+    },
+    {
+        "id": "lsd",
+        "head": "Lightsaber Defence (Lichtschwert Abwehr)",
+        "body": "Die Gegenfähigkeit zu Lightsaber Attack dient ausschliesslich zum Ausweichen von Nahkampfangriffen."
+    }
+
+    ,
+    {
+        "id": "fspee",
+        "head": "Force Speed",
+        "body": "Erhöht Angriffsgeschwindigkeit und beschleunigt Reisen."
+    },
+    {
+        "id": "fjump",
+        "head": "Force Jump",
+        "body": "Um über Abgründe zu gelangen und im Kampf wesentlich wendiger zu sein."
+    },
+    {
+        "id": "fpush",
+        "head": "Force Push",
+        "body": "Neutraler Angriff der Gegner gegen eine Wand schleudert. Gegenskill zu Grip."
+    },
+    {
+        "id": "fpull",
+        "head": "Force Pull",
+        "body": "Nützlich um entfernte Gegenstände an sich zu bringen."
+    },
+    {
+        "id": "fseei",
+        "head": "Force Seeing",
+        "body": "Gegenskill zu Force Blind und Projection. Erhöht Chance Gegenstände zu finden."
+    },
+    {
+        "id": "fsabe",
+        "head": "Force Saberthrow",
+        "body": "Text.."
+    }
+
+    ,
+    {
+        "id": "fpers",
+        "head": "Force Persuasion",
+        "body": "Vermag den Gegner von deiner Abwesenheit zu überzeugen. (Effekt: Unsichtbarkeit) Verringert Preise in Geschäften."
+        
+    },
+    {
+        "id": "fproj",
+        "head": "Force Projection",
+        "body": "Erzeugt eine Projektion seiner selbst, die den Gegner ablenken kann"
+    },
+    {
+        "id": "fblin",
+        "head": "Force Blind",
+        "body": "Blendet Gegner."
+    },
+    {
+        "id": "fconf",
+        "head": "Force Confuse",
+        "body": "Erzeugt Verwirrtheitszustände bei der angewandten Person"
+    },
+    {
+        "id": "fheal",
+        "head": "Force Heal",
+        "body": "Heilt Schäden."
+    },
+    {
+        "id": "fteam",
+        "head": "Force Team Heal",
+        "body": "Heilt Gruppen."
+    },
+    {
+        "id": "fprot",
+        "head": "Froce Protect",
+        "body": "Erzeugt ein temporäres Schutzfeld, das physischen Schaden mindert. Machtschaden wird darüberhinaus auch minimal gemindert"
+    },
+    {
+        "id": "fabso",
+        "head": "Force Absorb",
+        "body": "Erzeugt ein Temporäres Schutzfeld Feld das Machtschaden fast komplett absorbiert und in Mana umwandelt"
+    }
+
+    ,
+    {
+        "id": "fthro",
+        "head": "Force Throw",
+        "body": "Wirft herumliegende Teile gegen Gegner."
+    },
+    {
+        "id": "frage",
+        "head": "Force Rage",
+        "body": "Erhöht Angriffsstärke und Geschwindikeit drastisch, auf kosten von Lebensenergie und Mana."
+    },
+    {
+        "id": "fgrip",
+        "head": "Force Grip",
+        "body": "Würgt Gegner, mit ausreichender Fertigkeit lässt sich der Gegner auch anheben und wegschleudern."
+    },
+    {
+        "id": "fdrai",
+        "head": "Force Drain",
+        "body": "Stiehlt Lebensenergie von Gegnern und wandelt sie in eigene um."
+    },
+    {
+        "id": "fthun",
+        "head": "Force Thunderbolt",
+        "body": "Entlädt Blitze auf bestimmte Ziele."
+    },
+    {
+        "id": "fchai",
+        "head": "Force Chainlightning",
+        "body": "Breitgefächerte Blitze, die durch Materie dringen und somit mehrere Ziele treffen können."
+    },
+    {
+        "id": "fdest",
+        "head": "Force Destruction",
+        "body": "Kraftvolle Schockwelle, die bei ausreichender Fertigkeit zu Explosionen führen kann."
+    },
+    {
+        "id": "fdead",
+        "head": "Force deadly sight",
+        "body": "Fokusierte Objekte im Sichtfeld können mit dieser Fähigkeit stark erhitzt werden."
+    }
+
+    ,
+    {
+        "id": "frvtl",
+        "head": "Force Revitalize",
+        "body": "Text..."
+    }
+    ,
+    {
+        "id": "ftnrg",
+        "head": "Force Team Energize",
+        "body": "Text..."
+    }
+]

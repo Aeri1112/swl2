@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from 'react-router-dom';
-import '../bootstrap.min.css';
 
 const Nav = () => {
 
@@ -22,7 +21,10 @@ const Nav = () => {
                 Überblick
               </Link>
               <Link to="/abilities" className="dropdown-item">
-                Skills
+                Fähigkeiten
+              </Link>
+              <Link to="/forces" className="dropdown-item">
+                Mächte
               </Link>
           </div>
         </li>

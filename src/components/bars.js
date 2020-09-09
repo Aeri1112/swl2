@@ -15,7 +15,7 @@ class Bars extends React.Component {
                     <div className="text-muted small"></div>
                 </div>
                 <div className="progress-group-bars">
-                    <div className="progress progress-xs">
+                    <div style={{height: "4px"}} className="progress">
                     <div className={`progress-bar ${this.props.bg}`} role="progressbar" style={{width: this.props.width}} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>

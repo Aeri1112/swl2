@@ -11,3 +11,16 @@ export function fetchUserData () {
         })
     }
 }
+export function fetchUserChar () {
+    return function(dispatch) {
+        fetch('http://localhost/react/my-app/api/character/overview.php',
+        {
+            method: "POST",
+            body: JSON.stringify({userId: 4})
+        })
+        .then(response => response.json())
+        .then(response => {
+            dispatch({type: "FETCH_CHAR", payload: response[1]})
+        })
+    }
+}
