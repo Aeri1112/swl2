@@ -4,6 +4,7 @@ import "./styles/cake.css";
 import "./styles/style.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import Col from "react-bootstrap/Col";
 //loading components
 import Nav from './components/Nav';
 import Overview from './components/overview';
@@ -16,11 +17,13 @@ const App = () => {
     <>
         <Router>
           <Nav />
+          <Col md="9">
             <Switch>
               <Route path="/overview" component={Overview} />
               <Route path="/abilities" component={Abis} />
               <Route path="/forces" component={Forces} />
             </Switch>
+          </Col>
         </Router>
     </>
   )};

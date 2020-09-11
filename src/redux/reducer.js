@@ -2,10 +2,10 @@ import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
 
 import skills from './reducers/skills';
-import char from "./reducers/char";
+import alliance from "./reducers/alliance";
 
 export default combineReducers({
     skills,
-    char,
+    alliance,
   router: routerReducer
 });

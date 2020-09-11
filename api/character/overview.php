@@ -25,15 +25,18 @@
         $stm->execute(["id" => $_POST["userId"]]);
         $skills = $stm->fetch();
 
+        $skills["next_level_xp"] = round(((15 * ($skills["level"] * $skills["level"])) + 100 + pow(4,($skills["level"]/12))));
         $skills["max_health"] = ($skills["level"] * 2) + (($skills["cns"]) * 3) + 20 ;
-        $skills["max_mana"] = ($skills["level"] * 1.5) + ($skills["spi"] * 4) + ($skills["itl"] / 2.5) + 10 ;
+        $skills["max_mana"] = round(($skills["level"] * 1.5) + ($skills["spi"] * 4) + ($skills["itl"] / 2.5) + 10);
         $skills["max_energy"] = round(((($skills["level"] / 12.5) + ($skills["cns"] / 33) + ($skills["agi"] / 66))  * 3.3)+50,0);
 
-        $skills["health_width"] = $char["health"] * 100 / $skills["max_health"];
-        $skills["mana_width"] = $char["mana"] * 100 / $skills["max_mana"];
-        $skills["energy_width"] = $char["energy"] * 100 / $skills["max_energy"];
+        $skills["level_width"] = round($skills["xp"] * 100 / $skills["next_level_xp"], 2);
+        $skills["health_width"] = round($char["health"] * 100 / $skills["max_health"]);
+        $skills["mana_width"] = round($char["mana"] * 100 / $skills["max_mana"]);
+        $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
 
         $side["perc"] = round((abs($skills["side"]) / 32768 * 100),2);
+
         if($skills["side"] < 0)
         {
             $side["side"] = "dark";
@@ -51,7 +54,7 @@
         }
   
         echo json_encode(
-            [$side, $char, $skills, $_POST]
+            [$side, $char, $skills]
         );
         }
       else

@@ -10,8 +10,6 @@ class Abis extends React.Component {
     render() {
 
         return (
-        <Col md="9">
-            <Container>
                 <Row>
                     <Abi abi="cns"/>
                     <Abi abi="agi"/>
@@ -22,8 +20,6 @@ class Abis extends React.Component {
                     <Abi abi="lsa"/>
                     <Abi abi="lsd"/>
                 </Row>
-            </Container>
-        </Col>
         );
     }
 }

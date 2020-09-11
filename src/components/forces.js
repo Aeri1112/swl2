@@ -11,8 +11,6 @@ class Forces extends React.Component {
     render() {
 
         return (
-        <Col md="9">
-            <Container>
                 <Row>
                     <Force f="fspee"/>
                     <Force f="fjump"/>
@@ -42,8 +40,6 @@ class Forces extends React.Component {
                     <Force f="frvtl"/>
                     <Force f="ftnrg"/>
                 </Row>
-            </Container>
-        </Col>
         );
     }
 }
