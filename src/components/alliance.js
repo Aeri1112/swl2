@@ -10,20 +10,17 @@ const mapStateToProps = state => {
     };
   }
   
-  const mapDispatchToProps = (dispatch, ownProps) => {
-
-      const id = parseInt(ownProps.id);
+  const mapDispatchToProps = (dispatch) => {
 
     return {
-    dispatch_props: () => dispatch(fetchAllianceData(id))
+    dispatch_props: (id) => dispatch(fetchAllianceData(id))
   }
 }
 
 class Alliance extends React.Component{
 
     componentDidMount() {
-    this.props.dispatch_props();
-    console.log(this.props);
+    this.props.dispatch_props(this.props.id);
     }
 
     render () {

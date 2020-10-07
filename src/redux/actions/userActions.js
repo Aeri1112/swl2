@@ -24,6 +24,19 @@ export function fetchUserChar () {
         })
     }
 }
+export function fetchMaster () {
+    return function(dispatch) {
+        fetch('http://localhost/react/my-app/api/character/overview.php',
+        {
+            method: "POST",
+            body: JSON.stringify({userId: 4})
+        })
+        .then(response => response.json())
+        .then(response => {
+            dispatch({type: "FETCH_MASTER", payload: response[3]})
+        })
+    }
+}
 export function fetchUserSide () {
     return function(dispatch) {
         fetch('http://localhost/react/my-app/api/character/overview.php',

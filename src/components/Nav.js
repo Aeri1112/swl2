@@ -20,6 +20,9 @@ const Nav = () => {
               <Link to="/overview" className="dropdown-item">
                 Überblick
               </Link>
+              <Link to="/inventory" className="dropdown-item">
+                Ausrüstung
+              </Link>
               <Link to="/abilities" className="dropdown-item">
                 Fähigkeiten
               </Link>
