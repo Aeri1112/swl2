@@ -2,6 +2,7 @@ import { FETCH_STATS } from "../constants/actionTypes";
 import { FETCH_SIDE } from "../constants/actionTypes";
 import { FETCH_CHAR } from "../constants/actionTypes";
 import { FETCH_MASTER } from "../constants/actionTypes";
+import { FETCH_INV } from "../constants/actionTypes";
 
 const initialState = {
     fetching: false,
@@ -10,6 +11,7 @@ const initialState = {
     skills: {},
     side: {},
     master: {},
+    inv: {},
     error: null
 }
 
@@ -38,6 +40,12 @@ const skills = (state=initialState, action) => {
                 ...state,
                 fetched: true,
                 master: action.payload
+            }
+        case FETCH_INV:
+            return{
+                ...state,
+                fetched: true,
+                inv: action.payload
             }
         default:
         return state;   

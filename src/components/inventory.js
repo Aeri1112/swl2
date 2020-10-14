@@ -1,34 +1,59 @@
 import React from "react";
+import { ResponsiveEmbed } from "react-bootstrap";
 import { connect } from "react-redux";
-
-const mapStateToProps = state => {
-    return {
-        skills: state.skills.skills,
-        char: state.skills.char,
-        side: state.skills.side,
-        master: state.skills.master
-    };
-  }
-  const dispatchProps = dispatch => ({
-
-    fetchData: () => fetch('http://localhost/new_jtg/api/character/inventory?id=weapons')
-                        .then(response => response.json())
-                        .then(response => {
-                        dispatch({type: "FETCH_STATS", payload: response[2]});
-    })
-})
+import {GET} from "../tools/fetch";
 
 class Inventory extends React.Component {
 
-    componentDidMount () {
-        this.props.fetchData();
+    state = {
+        loading: true
+    }
+    componentDidMount = async () => {
+        try {
+            const response = await GET('/character/inventory?id=weapons')
+                        if(response) {
+                            this.props.onWeapons(response);
+                            this.setState({loading: false})
+                        }
+        }
+        catch (e) {
+            
+        }
     }
 
     render() {
+
+        let showInv = "Loading...";
+
+        if(this.state.loading === false) {
+
+            showInv = this.props.inv.items.map(item => {
+                return (
+                        <li>
+                            {item.name}
+                        </li>                    
+                );
+            });
+        }
         return (
-            <>Test</>
+            <>
+            <ul>
+                {showInv}
+            </ul>
+            </>
         );
     }
 }
 
-export default connect(mapStateToProps, dispatchProps)(Inventory);
+const mapStateToProps = state => {
+    return {
+        inv: state.skills.inv
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onWeapons: (data) => dispatch({type: "FETCH_INV", payload: data})
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Inventory);

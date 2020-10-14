@@ -6,8 +6,11 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import store from './redux/store';
+import {setBaseUrl} from "./tools/fetch";
 
 window.store = store;
+
+setBaseUrl('http://localhost/qyr/rest-api')
 
 ReactDOM.render(
   <React.StrictMode>
@@ -22,3 +25,4 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "sprintcube/cakephp-rest": "^1.0"
+    }
+}

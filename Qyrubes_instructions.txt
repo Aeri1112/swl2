@@ -1,0 +1,25 @@
+Weil es für mich einfacher ist,
+habe ich cake php in einem anderen ordner neu aufgesetzt. (rest-api)
+Da ich fremde plugins genutzt habe, und die wohl nicht cake 4.0  ready waren,
+war es eine ältere CakePHP version (3.x).
+Wie gross die änderungen zu 4.0 sind weiss ich erstmal nicht.
+Aber ich denke, das selbe Zeugs, kann ich relativ schnell auch sonst für Cake 4.0 hochziehen.
+Kann aber auch sein, dass das meiste auch so geht, was an code hattest.
+
+ich nutze 2 plugins 
+- https://github.com/sprintcube/cakephp-rest
+- https://github.com/ozee31/cakephp-cors
+
+Daher bitte in den "rest-api" ordner rein und "composer install" ausführen.
+
+Im TestController steht so das meiste, sollte fürs verständnis reichen.
+
+Auf React-seite habe ich ein kleines Modul installiert und sonst eine angepasste "fetch" version integriert unter tools/fetch.js
+Dadurch solltest auf der root ebende noch "npm install" ausführen.
+Ansonsten habe ich die login.js etwas angepasst.
+Innerhalb der beiden Dateien sind auch die erklärungen.
+
+Es wird JWT benutzt. Falls du weitere Erklärungen zu JWT willst, sagst bescheid, dann erklär ich dir das prinzip.
+Auch empfehle ich es in Firefox mit der Extension (https://addons.mozilla.org/de/firefox/addon/cors-everywhere/)
+zu testen. Es mag sein, dass request funktionieren, aber bei fehlern könnte CORS wieder versagen.
+Mit dem Plugin sollte es gehen.
