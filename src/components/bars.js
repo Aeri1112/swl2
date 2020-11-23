@@ -9,23 +9,23 @@ class Bars extends React.Component {
         let perc;
         switch (this.props.type) {
             case "Health":
-                img = <img src={require(`../images/heart.png`) }/>;
+                img = <img src={require(`../images/heart.png`) } alt=""/>;
                 perc = this.props.width;
                 break;
             case "Mana":
-                img = <img src={require(`../images/poison.png`) }/>;
+                img = <img src={require(`../images/poison.png`) } alt=""/>;
                 perc = this.props.width;
                 break;
             case "Energy":
-                img = <img src={require(`../images/energy.png`) }/>;
+                img = <img src={require(`../images/energy.png`) } alt=""/>;
                 perc = this.props.width;
                 break;
             case "Experience":
-                img = <img src={require(`../images/growth.png`) }/>;
+                img = <img src={require(`../images/growth.png`) } alt=""/>;
                 perc = this.props.width;
                 break;
             case "Ausrichtung":
-                img = <img src={require(`../images/transfer.png`) }/>;
+                img = <img src={require(`../images/transfer.png`) } alt=""/>;
                 side = `linear-gradient(to right, #dc3545 ${this.props.perc + 40}%, white ${this.props.white}%, #28a745 ${60-this.props.perc}%)`;
                 perc = this.props.perc + "%";
                 break;

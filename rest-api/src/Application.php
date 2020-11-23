@@ -55,7 +55,6 @@ class Application extends BaseApplication
         }
 
         // Load more plugins here
-//        $this->addPlugin('Rest', ['bootstrap' => true]);
     }
 
     /**

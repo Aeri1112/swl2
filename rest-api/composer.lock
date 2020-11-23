@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "255603018e31e16645b42224a2f2b589",
+    "content-hash": "e843866526e149563a1a1b52c7ed2e41",
     "packages": [
         {
             "name": "aura/intl",
@@ -527,24 +527,24 @@
         },
         {
             "name": "ozee31/cakephp-cors",
-            "version": "v1.1.7",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ozee31/cakephp-cors.git",
-                "reference": "da42a1aaf3a9093eda82cc40f11b84c90af79b79"
+                "reference": "100627363eb34f843b2e6ce59b01ccb4796c0d75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ozee31/cakephp-cors/zipball/da42a1aaf3a9093eda82cc40f11b84c90af79b79",
-                "reference": "da42a1aaf3a9093eda82cc40f11b84c90af79b79",
+                "url": "https://api.github.com/repos/ozee31/cakephp-cors/zipball/100627363eb34f843b2e6ce59b01ccb4796c0d75",
+                "reference": "100627363eb34f843b2e6ce59b01ccb4796c0d75",
                 "shasum": ""
             },
             "require": {
                 "cakephp/cakephp": ">=3.3.2 <4.0.0",
-                "php": ">=5.6"
+                "php": ">=5.5.9"
             },
             "require-dev": {
-                "phpunit/phpunit": "5.*"
+                "phpunit/phpunit": "*"
             },
             "type": "cakephp-plugin",
             "autoload": {
@@ -554,7 +554,11 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "description": "A CakePHP (3.3.x) plugin for activate cors domain in your application",
-            "time": "2019-01-25T16:39:57+00:00"
+            "support": {
+                "issues": "https://github.com/ozee31/cakephp-cors/issues",
+                "source": "https://github.com/ozee31/cakephp-cors/tree/v1.0.0"
+            },
+            "time": "2016-11-09T10:18:09+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -933,6 +937,10 @@
                 "cakephp",
                 "rest"
             ],
+            "support": {
+                "issues": "https://github.com/sprintcube/cakephp-rest/issues",
+                "source": "https://github.com/sprintcube/cakephp-rest"
+            },
             "time": "2018-08-20T06:16:58+00:00"
         },
         {
@@ -5125,5 +5133,5 @@
         "php": ">=7.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

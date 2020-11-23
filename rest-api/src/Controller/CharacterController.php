@@ -12,30 +12,30 @@ class CharacterController extends RestController {
     public function overview()
     {			
 		$this->LoadModel('JediUserChars');  
-        $char = $this->JediUserChars->get($this->Authentication->getIdentity()->id);
+        $char = $this->JediUserChars->get($this->Auth->User("id"));
         $this->set('char',$char);
 
         $this->LoadModel('JediUserSkills');  
-        $skills = $this->JediUserSkills->get($this->Authentication->getIdentity()->id);
+        $skills = $this->JediUserSkills->get($this->Auth->User("id"));
 
         $this->LoadModel('JediItemsJewelry');
-        $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Authentication->getIdentity()->id]);
+        $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
         
         $this->LoadModel('JediItemsWeapons');
-        $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Authentication->getIdentity()->id]);        
+        $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);        
 		
 		//Voraussetzungen für einen Quest erfüllt?
-		if($this->Authentication->getIdentity()->id == 20)
+		if($this->Auth->User("id") == 20)
 		{
 			$this->Quest->aktiviere_quest();
-			$aktiviere = $this->Quest->pruefe_auf_quests($this->Authentication->getIdentity()->id, $char->location);
+			$aktiviere = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
 
 			if($aktiviere == 1)
 			{
-				$step_details = $this->Quest->getStepText($this->Authentication->getIdentity()->id);
+				$step_details = $this->Quest->getStepText($this->Auth->User("id"));
 				if($step_details["typ"] == "wait")
 				{
-					$this->set("quest_output",$this->Quest->wait($this->Authentication->getIdentity()->id));
+					$this->set("quest_output",$this->Quest->wait($this->Auth->User("id")));
 				}
 				$this->set("step_details",$step_details);
 				$this->set("quest",true);
@@ -91,7 +91,7 @@ class CharacterController extends RestController {
 
         if($skills->rsp > 0)
         {
-            if($this->request->is(['put']))
+            if($this->request->is(['post']))
             {
                 $posts = $this->request->getData();
                 $skills[$posts["train"]] += 1;
@@ -116,7 +116,7 @@ class CharacterController extends RestController {
 
         if($skills->rfp > 0)
         {
-            if($this->request->is(['put']))
+            if($this->request->is(['post']))
             {
                 $posts = $this->request->getData();
                 $skills[$posts["train"]] += 1;
@@ -141,7 +141,7 @@ class CharacterController extends RestController {
 				'itemid', 'name', 'mindmg', 'maxdmg', 'price', 'qlvl', 'reql', 'reqs', 'stat1_value', 'stat2_value', 'stat3_value', 'stat4_value', 'stat5_value'
 			],
 			// Other keys here.
-			'limit' => 9,
+			'limit' => 10,
 			'order' => ['itemid' => 'desc']
     ];
 
@@ -193,7 +193,7 @@ class CharacterController extends RestController {
                     $item->position = "inv";
                     $this->JediItemsJewelry->save($item);
                 }
-                $this->redirect(['action' => 'inventory']);
+                #$this->redirect(['action' => 'inventory']);
             }
 
             //Equip
@@ -283,12 +283,12 @@ class CharacterController extends RestController {
                         $this->Flash->error(__('not your Ring or not in your inventory'));
                     }    
                 }
-                $this->redirect(['action' => 'inventory']);
+                #$this->redirect(['action' => 'inventory']);
             }
         }
 		elseif($char->actionid != 0 && $char->targetid != 0 && $char->targettime != 0)
 		{
-			$this->Flash->error(__('You are busy'));
+			$this->set("error","you can not switch Items. You are currently doing something else");
 		}
         $this->set("char",$char);
        
@@ -396,13 +396,41 @@ class CharacterController extends RestController {
             }
 
             $query = $this->$table->find()
-                                    ->where(['ownerid' => 4])
+                                    ->where(['ownerid' => $this->Auth->User("id")])
                                     ->where(['position' => 'inv']);
+
+            if($this->request->getQuery('search')) {
+
+                $searchFor = $this->request->getQuery('search');
+                $this->set("integer",is_numeric($searchFor));
+                if(is_numeric($searchFor)) {
+                    $searchFor = intval($searchFor);
+                    $query = $query->where(["OR" => [["name LIKE" => "%".$searchFor."%"], 
+                                                    ["mindmg" => $searchFor],
+                                                    ["maxdmg" => $searchFor],
+                                                    ["stat1 LIKE" => "%".$searchFor."%"],
+                                                    ["stat2 LIKE" => "%".$searchFor."%"],
+                                                    ["stat3 LIKE" => "%".$searchFor."%"],
+                                                    ["stat4 LIKE" => "%".$searchFor."%"],
+                                                    ["stat5 LIKE" => "%".$searchFor."%"]]]);
+                }
+                else {
+                    $query = $query->where(["OR" => [["name LIKE" => "%".$searchFor."%"],
+                                                    ["stat1 LIKE" => "%".$searchFor."%"],
+                                                    ["stat2 LIKE" => "%".$searchFor."%"],
+                                                    ["stat3 LIKE" => "%".$searchFor."%"],
+                                                    ["stat4 LIKE" => "%".$searchFor."%"],
+                                                    ["stat5 LIKE" => "%".$searchFor."%"]]]);
+                }
+            }
+
 			if(!empty($query))
 			{
 				$query->select([
 					'itemid',
-					'img',
+                    'img',
+                    $specialstat1,
+                    $specialstat2,
 					'stat1_mod' => 'SUBSTRING_INDEX(`stat1`, ",", 1)', 
 					'stat1_value' => 'CAST(SUBSTRING_INDEX(`stat1`, ",", -1) AS UNSIGNED)',
 					'stat1_stat' => 'SUBSTRING_INDEX(SUBSTRING_INDEX(`stat1`, ",", 2),",",-1)',
@@ -421,8 +449,8 @@ class CharacterController extends RestController {
 					'name', 'qlvl', 'reql', 'reqs', 
 					'price'
 				]);
-
-				$this->set("items", $this->paginate($query));
+                $this->set("totalItems",$query->count());
+                $this->set("items", $this->paginate($query));
 				$this->set("img",$img);
 			}
         }

@@ -360,7 +360,7 @@ return [
     ],
 
     'Cors'    => [
-        'AllowOrigin' => '*',
+        'AllowOrigin' => true,
         'AllowCredentials' => true,
         'AllowMethods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // accept all HTTP methods
         'AllowHeaders' => true, // accept all headers

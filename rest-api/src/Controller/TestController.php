@@ -52,9 +52,13 @@ class TestController extends RestController
         $user = $this->Auth->identify();
         if ($user) {
             $this->Auth->setUser($user);
+            $this->set("user",$this->Auth->user());
+            $this->set(compact('token'));
         }
-        $this->set("user",$this->Auth->user());
-        $this->set(compact('token'));
+        else {
+            $this->set("error","wrong username or password");
+        }
+        
     }
 
     /**

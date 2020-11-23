@@ -1,8 +1,6 @@
 import React from "react";
 import Abi from "./ability";
 
-import Container from "react-bootstrap/Container";
-import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
 class Abis extends React.Component {

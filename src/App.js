@@ -10,8 +10,9 @@ import Nav from './components/Nav';
 import Overview from './components/overview';
 import Abis from './components/abilities';
 import Forces from "./components/forces";
-import Inventory from "./components/inventory";
+import Inventory from "./components/inventory_3";
 import Login from "./components/login";
+import Blackjack from "./components/casino/blackjack/Blackjack";
 
 const App = () => {
 
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="/forces" component={Forces} />
               <Route path="/inventory" component={Inventory} />
               <Route path="/login" component={Login}/>
+              <Route path="/casino" component={Blackjack}/>
             </Switch>
           </Col>
         </Router>
