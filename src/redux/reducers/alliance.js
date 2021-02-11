@@ -3,7 +3,7 @@ import { FETCH_DATA } from "../constants/actionTypes";
 const initialState = {
     fetching: false,
     fetched: false,
-    data: {},
+    AlliData: {},
     error: null
 }
 
@@ -13,7 +13,7 @@ const alliance = (state=initialState, action) => {
             return{
                 ...state,
                 fetched: true,
-                data: action.payload
+                AlliData: action.payload
             }
         default:
         return state;   

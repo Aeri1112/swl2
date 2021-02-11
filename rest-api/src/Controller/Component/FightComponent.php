@@ -46,7 +46,7 @@ class FightComponent extends Component
         else
         {
           //fightid lock
-          $fight_locks = $this->JediFightLocks->newEmptyEntity();
+          $fight_locks = $this->JediFightLocks->newEntity();
           $fight_locks->fightid = $id;
           $fight_locks->since = time();
           $this->JediFightLocks->save($fight_locks);
@@ -1380,7 +1380,7 @@ class FightComponent extends Component
             //Ende for schleife kampfwerte berechnen
             }
             //Hier der Teil mit debug in die Tabelle jedi_kwl
-            $jedi_kwl = $this->JediKwl->newEmptyEntity();
+            $jedi_kwl = $this->JediKwl->newEntity();
             $jedi_kwl->date = time();
             $jedi_kwl->name_1 = $p->char->username;
             $jedi_kwl->bonus_1 = $p->bonus;
@@ -4338,7 +4338,7 @@ class FightComponent extends Component
 
                         if($this->JediUserStatistics->find()->where(['userid' => $userid])->first() == null)
                         {
-                            $statistics = $this->JediUserStatistics->newEmptyEntity();
+                            $statistics = $this->JediUserStatistics->newEntity();
                         }
                         else
                         {
@@ -4620,7 +4620,7 @@ class FightComponent extends Component
 
                         if($this->JediUserStatistics->find()->where(['userid' => $userid])->first() == null)
                         {
-                            $statistics = $this->JediUserStatistics->newEmptyEntity();
+                            $statistics = $this->JediUserStatistics->newEntity();
                         }
                         else
                         {
@@ -4855,7 +4855,7 @@ class FightComponent extends Component
 
         if($fight_data->type2 == "")
         {
-            $db_fight_report = $this->JediFightReports->newEmptyEntity();
+            $db_fight_report = $this->JediFightReports->newEntity();
             $db_fight_report->zeit = time();
             $db_fight_report->md5 = $md5;
             $db_fight_report->report = $fight_report;
@@ -4865,7 +4865,7 @@ class FightComponent extends Component
         }
         elseif($fight_data->type2 == "event")
         {
-            $db_fight_report = $this->JediEventsSingleFightReports->newEmptyEntity();
+            $db_fight_report = $this->JediEventsSingleFightReports->newEntity();
             $db_fight_report->zeit = time();
             $db_fight_report->md5 = $md5;
             $db_fight_report->report = $fight_report;

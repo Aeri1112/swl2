@@ -66,7 +66,18 @@ Router::scope('/', function (RouteBuilder $routes) {
     $routes->connect('/test/login', ['controller' => 'Test', 'action' => 'login', 'isRest' => true]);
     $routes->connect('/test/auth', ['controller' => 'Test', 'action' => 'auth', 'isRest' => true, 'requireAuthorization' => true]);
     $routes->connect('/character/inventory', ['controller' => 'Character', 'action' => 'inventory', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/character/overview', ['controller' => 'Character', 'action' => 'overview', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/character/abilities', ['controller' => 'Character', 'action' => 'abilities', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/character/forces', ['controller' => 'Character', 'action' => 'forces', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/character/saveuser', ['controller' => 'Character', 'action' => 'saveuser', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/city/apa', ['controller' => 'City', 'action' => 'apa', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/city/bar', ['controller' => 'City', 'action' => 'bar', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/city/layer', ['controller' => 'City', 'action' => 'layer', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/city/arena', ['controller' => 'City', 'action' => 'arena', 'isRest' => true, 'requireAuthorization' => true]);
 
+    $routes->connect('/preferences/fight', ['controller' => 'Preferences', 'action' => 'fight', 'isRest' => true, 'requireAuthorization' => true]);
+    
+    $routes->connect('/alliances', ['controller' => 'Alliances', 'action' => 'index', 'isRest' => true, 'requireAuthorization' => true]);
     /*
      * ...and connect the rest of 'Pages' controller's URLs.
      */

@@ -9,6 +9,52 @@ use Rest\Controller\RestController;
 
 class CharacterController extends RestController {
 
+    public function initialize(): void
+    {
+        parent::initialize();
+        $this->loadComponent('maxHealth');
+    }
+
+    //api fetch user function character/user&id=
+    public function user() {
+
+        $requestID = $this->request->getQuery("id");
+        if(!$this->request->getQuery("id")) {
+            $requestID = $this->Auth->User("id");
+        }
+        $this->LoadModel('JediUserChars');  
+        $char = $this->JediUserChars->get($requestID);
+
+        $this->LoadModel('JediUserSkills');  
+        $skills = $this->JediUserSkills->get($requestID);
+
+        $this->LoadModel('JediItemsJewelry');
+        $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $requestID]);
+        
+        $this->LoadModel('JediItemsWeapons');
+        $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $requestID]); 
+
+        $response["char"] = $char;
+        $response["skills"] = $skills;
+
+        $this->set("user",$response);
+    }
+
+    public function SaveUser() {
+        $this->LoadModel("JediUserChars");
+        $this->LoadModel("JediUserSkills");
+
+        $where = $this->request->getData("where");
+        $what = $this->request->getData("what");
+        $amount = $this->request->getData("amount");
+
+        if($where == "char") {
+            $char = $this->JediUserChars->get($this->Auth->User("id"));
+            $char[$what] = $amount;
+            $this->JediUserChars->save($char);
+        }
+    }
+
     public function overview()
     {			
 		$this->LoadModel('JediUserChars');  
@@ -23,42 +69,6 @@ class CharacterController extends RestController {
         
         $this->LoadModel('JediItemsWeapons');
         $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);        
-		
-		//Voraussetzungen für einen Quest erfüllt?
-		if($this->Auth->User("id") == 20)
-		{
-			$this->Quest->aktiviere_quest();
-			$aktiviere = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
-
-			if($aktiviere == 1)
-			{
-				$step_details = $this->Quest->getStepText($this->Auth->User("id"));
-				if($step_details["typ"] == "wait")
-				{
-					$this->set("quest_output",$this->Quest->wait($this->Auth->User("id")));
-				}
-				$this->set("step_details",$step_details);
-				$this->set("quest",true);
-			}
-		}
-		
-        //////////////////////////////////////////
-		
-        //Levelup?
-        if($skills->xp >= $this->calc_xp_next_lvl($skills->level))
-        {
-            $xp_ueberschuss = $skills->xp - $this->calc_xp_next_lvl($skills->level);
-            $this->set('levelUp','ya');
-            $skills->level += 1;
-            $skills->rsp += 5;
-            $skills->rfp += 3;
-            $skills->xp = $xp_ueberschuss;
-            $char->health = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model);
-            $char->mana = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
-            $char->energy = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
-			$this->JediUserSkills->save($skills);
-            $this->JediUserChars->save($char);
-        }
 
         $side["perc"] = round((abs($skills->side) / 32768 * 100),2);
         if($skills->side < 0)
@@ -81,25 +91,40 @@ class CharacterController extends RestController {
         $skills['next_level_xp'] = $this->calc_xp_next_lvl($skills->level);
         $skills['max_health'] = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model); 
         $skills['max_mana'] = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
-        $skills['max_engery'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+        $skills['max_energy'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+
+        $skills["level_width"] = round($skills["xp"] * 100 / $skills["next_level_xp"], 2);
+        $skills["health_width"] = round($char["health"] * 100 / $skills["max_health"]);
+        $skills["mana_width"] = round($char["mana"] * 100 / $skills["max_mana"]);
+        $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
+        
         $this->set('skills',$skills);
     }
+
     public function abilities()
     {
         $this->LoadModel('JediUserSkills');  
-        $skills = $this->JediUserSkills->get($this->Auth->User("id"));
+        //Hier nur abis abfragen, um über react loopen zu können
+        $skills = $this->JediUserSkills->find()->select(["cns","agi","lsa","lsd","dex","tac","spi","itl"])->where(["userid" => $this->Auth->User("id")]);
 
-        if($skills->rsp > 0)
+        //dann nochmal die skillpoints abfragen
+        $skillPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
+        
+        $this->set("rsp",$skillPoints->rsp);
+        $this->set('skills',$skills);
+        
+        //skillen
+        if($skillPoints->rsp > 0)
         {
             if($this->request->is(['post']))
             {
-                $posts = $this->request->getData();
-                $skills[$posts["train"]] += 1;
+                $skills = $this->JediUserSkills->get($this->Auth->User("id"));
+                $posts = $this->request->getData("train");
+                $skills[$posts] += 1;
                 $skills->rsp -= 1;
                 $this->JediUserSkills->save($skills);
             }
         }
-        $this->set('skills',$skills);
         
         $this->LoadModel('JediItemsJewelry');
         $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
@@ -109,22 +134,36 @@ class CharacterController extends RestController {
 
         $this->set('tempBonus',$this->maxHealth->tempBonus($jewelry_model, $weapons_model));
     }
+
+    public function points($points) {
+        $this->LoadModel('JediUserSkills'); 
+        $skillPoints = $this->JediUserSkills->find()->select([$points])->where(["userid" => $this->Auth->User("id")])->first();
+        $this->set("points",$skillPoints);
+    }
+
     public function forces()
     {
         $this->LoadModel('JediUserSkills');  
-        $skills = $this->JediUserSkills->get($this->Auth->User("id"));
+        //Hier nur abis abfragen, um über react loopen zu können
+        $skills = $this->JediUserSkills->get(["userid" => $this->Auth->User("id")]);
 
-        if($skills->rfp > 0)
+        //dann nochmal die skillpoints abfragen
+        $skillPoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
+
+        $this->set("rfp",$skillPoints->rfp);
+        $this->set('skills',$skills);
+
+        if($skillPoints->rfp > 0)
         {
             if($this->request->is(['post']))
             {
-                $posts = $this->request->getData();
-                $skills[$posts["train"]] += 1;
+                $skills = $this->JediUserSkills->get($this->Auth->User("id"));
+                $posts = $this->request->getData("train");
+                $skills[$posts] += 1;
                 $skills->rfp -= 1;
                 $this->JediUserSkills->save($skills);
             }
         }
-        $this->set('skills',$skills);
         
         $this->LoadModel('JediItemsJewelry');
         $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
@@ -132,7 +171,6 @@ class CharacterController extends RestController {
         $this->LoadModel('JediItemsWeapons');
         $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
 
-        $this->set('tempBonus',$this->maxHealth->tempBonus($jewelry_model, $weapons_model)); 
         $this->set('tempBonusForces',$this->maxHealth->tempBonusForces($jewelry_model, $weapons_model));       
     }
 
@@ -459,12 +497,6 @@ class CharacterController extends RestController {
     private function calc_xp_next_lvl($level)
     {
         return round(((15 * ($level * $level)) + 100 + pow(4,($level/12))));
-    }
-    public function initialize(): void
-    {
-        parent::initialize();
-        $this->loadComponent('maxHealth');
-        $this->loadComponent('Paginator');
     }
 }
 

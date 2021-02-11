@@ -10,8 +10,8 @@ class Modal extends React.Component{
         return (
             <>
             {
-                skills.map(content => content.id === target ? (
-                    <div className="modal fade" id={`${target}Modal`} tabIndex="-1" role="dialog" aria-labelledby={`${target}ModalLabel`} aria-hidden="true">
+                skills.map((content, index) => content.id === target ? (
+                    <div key={index} className="modal fade" id={`${target}Modal`} tabIndex="-1" role="dialog" aria-labelledby={`${target}ModalLabel`} aria-hidden="true">
                         <div className="modal-dialog" role="document">
                             <div className="modal-content">
                                 <div className="modal-header">
@@ -26,9 +26,8 @@ class Modal extends React.Component{
                             </div>
                         </div>
                     </div>
-                    ) : (
-                        <></>
-                    )
+                    ) : 
+                    null
             )}
             </>
         )

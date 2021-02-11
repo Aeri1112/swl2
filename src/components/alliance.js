@@ -1,37 +1,40 @@
-import React from "react";
-import { connect } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {GET} from "../tools/fetch";
+
 import { fetchAllianceData } from "../redux/actions/allianceActions";
 
+const Alliance = () => {
 
-const mapStateToProps = state => {
-    
-    return {
-        alli: state.alliance.data
-    };
-  }
-  
-  const mapDispatchToProps = (dispatch) => {
+    const [loading, setLoading] = useState();
+    const dispatch = useDispatch();
+    const AlliData = useSelector(state => state.alliance);
 
-    return {
-    dispatch_props: (id) => dispatch(fetchAllianceData(id))
-  }
-}
-
-class Alliance extends React.Component{
-
-    componentDidMount() {
-    this.props.dispatch_props(this.props.id);
+    const loadingAllianceData = async() => {
+        try {
+            setLoading(true)
+            const response = await GET('/alliances')
+            if (response) {
+                dispatch(fetchAllianceData(response))
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            // finally wird immer ausgefuehrt.
+            // dadurch wird der state auch immer danach false gesetzt.
+            setLoading(false)
+        }
     }
 
-    render () {
-            const { alli } = this.props;
+    useEffect(() => {
+        loadingAllianceData();
+    }, []);
 
-        return (
-            <>
-            {alli.name}
-            </>
-        )
-    }
+    return (
+    <>
+    {loading === false ? "" + AlliData.AlliData.alliance.name + " (" + AlliData.AlliData.alliance.short + ")" : null}
+    </>
+    );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Alliance);
+export default Alliance;

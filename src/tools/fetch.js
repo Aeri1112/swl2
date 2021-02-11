@@ -62,6 +62,12 @@ const _fetch = async (url, options = {}) => {
 		// generell verpackt das rest plugin in cake den content in einen result feld.
 		// dieses feld wird immer befuellt.
 		// daher werfe ich nen error, dieser kann dann per try/catch order .catch(...) gefangen werden.
+		/*
+		if(response.status === 401 || response.status === 404) {
+			window.location.assign("/login");
+			return;
+		}
+		*/
 		throw get(data, 'result', {mesasge : response.statusText, code: response.status})
 	}
 	// dito wie beim error, nur zusaetzlich mit fallback, wird es aber normal nicht brauchen

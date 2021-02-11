@@ -3,11 +3,15 @@ import Hand from "./Hand";
 import DealersHand from "./DealersHand";
 import Shoe from "./Shoe";
 import BetInput from "./BetInput";
+import {GET, POST} from "../../../tools/fetch";
 
 import Button from 'react-bootstrap/Button'
 
 const Blackjack = () => {
     
+    const [loading, setLoading] = useState();
+    const [saving, setSaving] = useState();
+
     const [gameStatus, setGameStatus] = useState("prep");
     const [isDealing, setDealing] = useState(false);
     const [insuranceAv, setInsuranceAv] = useState(false);
@@ -22,7 +26,7 @@ const Blackjack = () => {
     const [PlayerCardsCount, setPlayerCardsCount] = useState(0);
     const [PlayerIsDouble, setPlayerIsDouble] = useState(false);
     const [insurance, setInsurance] = useState(false);
-    const [cash, setCash] = useState(500);
+    const [cash, setCash] = useState(0);
     const [split, setSplit] = useState(false);
     const [bet, setBet] = useState(1);
     const [PlayerHandStatus, setPlayerHandStatus] = useState("");
@@ -40,6 +44,40 @@ const Blackjack = () => {
     const [DealerCards, setDealerCards] = useState([]);
     const [DealerCardsCount, setDealerCardsCount] = useState(0);
     const [DealerNoBJ, setDealerNoBJ] = useState(false);
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const response = await GET('/character/overview')
+            if (response) {
+                setCash(response.char.cash)
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            // finally wird immer ausgefuehrt.
+            // dadurch wird der state auch immer danach false gesetzt.
+            setLoading(false)
+        }
+    };
+
+    const SaveData = async () => {
+        setSaving(true);
+        try {
+            const response = await POST('/character/saveuser', {where:"char", what:"cash", amount:cash})
+            console.log(response)
+        } catch (e) {
+            console.error(e)
+        } finally {
+            // finally wird immer ausgefuehrt.
+            // dadurch wird der state auch immer danach false gesetzt.
+            setSaving(false)
+        }
+    }
+
+    useEffect(() => {
+        loadData();
+    },[]);
 
     useEffect(() => {
         if(gameStatus === "prep") {
@@ -112,6 +150,7 @@ const Blackjack = () => {
         }
         else if (gameStatus === "finish") {
             whoWins();
+            SaveData();
         }
     }, [gameStatus, DealerCards])
 
@@ -514,6 +553,7 @@ const Blackjack = () => {
         }
     }
     return (
+        loading === false ?
         <div>
             <div className="h4">Your Cash: {cash} <br/>
             Your Bet: {bet}</div>
@@ -659,14 +699,15 @@ const Blackjack = () => {
                 Enter Bet and push Deal</div> 
                 <Button
                     variant="primary"
-                    disabled={bet > 0 && bet <= cash ? false : true}
+                    disabled={bet > 0 && bet <= cash && !saving ? false : true}
                     onClick={!isDealing ? handleClickDeal : null}
                 >
-                    {isDealing ? 'dealing...' : 'Deal!'}
+                    {isDealing ? 'dealing...' : saving ? "saving..." : 'Deal!'}
                 </Button>
                 </>
                 : null
             }            
-        </div>);
+        </div>
+        : "loading...");
 }
 export default Blackjack;

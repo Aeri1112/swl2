@@ -4,14 +4,10 @@ use Cake\Event\EventInterface;
 use Cake\ORM\TableRegistry;
 use Cake\I18n\FrozenTime;
 use Cake\Datasource\ConnectionManager;
+use Rest\Controller\RestController;
 
 
-class CityController extends AppController {
-
-    public function beforeFilter(EventInterface $event)
-    {
-        $this->viewBuilder()->setLayout('main');
-    }
+class CityController extends RestController {
 
     public function initialize(): void
     {
@@ -38,33 +34,32 @@ class CityController extends AppController {
 
 		$skills['max_health'] = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model); 
         $skills['max_mana'] = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
-        $skills['max_engery'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+        $skills['max_energy'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
 		
+		$skills["health_width"] = round($char["health"] * 100 / $skills["max_health"]);
+        $skills["mana_width"] = round($char["mana"] * 100 / $skills["max_mana"]);
+        $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
         //Kein Leben für Layer
         if($char->health <= 10 && $char->actionid != 2)
         {
             $this->Flash->error("Check your health");
-            return $this->redirect(['controller' => 'character', 'action' => 'overview']);
         }
 
         //Keine Energy für Layer
         if($char->energy < 1 && $char->actionid != 2)
         {
             $this->Flash->error("check your energy");
-            return $this->redirect(['controller' => 'character', 'action' => 'overview']);
         }
 
         //Keine Waffe für Layer
         if($char->item_hand == 0)
         {
             $this->Flash->error("better equip a weapon");
-            return $this->redirect(['controller' => 'character', 'action' => 'inventory']);
         }
 
         if((!empty($this->JediFightsPlayers->find()->where(["userid" => $this->Auth->User("id")])->where(["npc" => "n"])->first())) && $char->actionid != 2)
         {
-            $this->Flash->error("You are already fighting somewhere else");
-            return $this->redirect(['controller' => 'character', 'action' => 'overview']);
+            $this->set("busy",true);
         }
 
 		//casting fseei
@@ -92,7 +87,6 @@ class CityController extends AppController {
 					}
 					if($manacon <= $char->mana)
 					{
-						$char->location2 = "".$this->request->getData("a")."_".$this->request->getData("b")."";
 						$char->mana -= $manacon;
 						$char->tmpcast = $tmpcast;
 						$this->JediUserChars->save($char);
@@ -197,14 +191,14 @@ class CityController extends AppController {
                     }
 
                     //in die DB
-                    $fights = $this->JediFights->newEmptyEntity();
+                    $fights = $this->JediFights->newEntity();
                     $fights->type = $type;
                     $fights->opentime = time();
                     $fights->startin = 300;
                     $this->JediFights->save($fights);
                     $fightId = $this->JediFights->find()->last();
 
-                    $fights_player = $this->JediFightsPlayers->newEmptyEntity();
+                    $fights_player = $this->JediFightsPlayers->newEntity();
                     $fights_player->fightid = $fightId["fightid"];
                     $fights_player->userid = $this->Auth->User("id");
                     $fights_player->teamid = 0;
@@ -216,7 +210,7 @@ class CityController extends AppController {
                         while($i > 0)
                         {
                             $i--;
-                            $fights_player = $this->JediFightsPlayers->newEmptyEntity();
+                            $fights_player = $this->JediFightsPlayers->newEntity();
                             $fights_player->fightid = $fightId["fightid"];
                             $fights_player->userid = 2;
                             $fights_player->teamid = 1;
@@ -226,15 +220,13 @@ class CityController extends AppController {
                     }
                     else
                     {
-                        $fights_player = $this->JediFightsPlayers->newEmptyEntity();
+                        $fights_player = $this->JediFightsPlayers->newEntity();
                         $fights_player->fightid = $fightId["fightid"];
                         $fights_player->userid = 2;
                         $fights_player->teamid = 1;
                         $fights_player->npc = "y";
                         $this->JediFightsPlayers->save($fights_player);
                     }                    
-
-                    $this->redirect(['action' => 'layer']);
                 }
                 else
                 {
@@ -611,13 +603,15 @@ class CityController extends AppController {
         $this->loadModel("JediUserSkills");
         
         $char = $this->loadModel("JediUserChars")->get($this->Auth->User("id"));
-        $char->skills = $this->loadModel("JediUserSkills")->get($this->Auth->User("id"));
+		$char->skills = $this->loadModel("JediUserSkills")->get($this->Auth->User("id"));
+		$this->set("char",$char);
+		$this->set("skills",$char->skills);
      
         //Kein Leben für Arena
         if($char->health <= 20 && $char->actionid != 15)
         {
-            $this->Flash->error("Better check your health");
-            $this->redirect(['controller' => 'character', 'action' => 'overview']);
+			$this->Flash->error("Better check your health");
+			return;
         }
 
 		$char->location = "Arena";
@@ -628,79 +622,72 @@ class CityController extends AppController {
         {
             $char->actionid = 0;
             $char->lastfightid = 0;
-            $this->JediUserChars->save($char);
-            return $this->redirect(["action" => "arena"]);
+			$this->JediUserChars->save($char);
+			return;
         }
 
+		//calculate restriction
+		//1 (15%)
+		$res["1_low"] = $char->skills->level - floor($char->skills->level * 0.15);
+		$res["1_high"] = $char->skills->level + floor($char->skills->level * 0.15);
+
+		//2 (27%)
+		$res["2_low"] = $char->skills->level - floor($char->skills->level * 0.27);
+		$res["2_high"] = $char->skills->level + floor($char->skills->level * 0.27);
+
+		//3 (39%)
+		$res["3_low"] = $char->skills->level - floor($char->skills->level * 0.39);
+		$res["3_high"] = $char->skills->level + floor($char->skills->level * 0.39);            
+
+		$this->set("res",$res);
+			
         //Open Fight
         if($this->request->getParam('pass') && $this->request->getParam('pass')[0] == "open")
         {
             if(!empty($this->JediFightsPlayers->find()->where(["userid" => $this->Auth->User("id")])->where(["npc" => "n"])->first()))
             {
-                $this->Flash->error("You are already fighting somewhere else");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("You are already fighting somewhere else");
+				return;
             }
 			
 			//Keine Energy für Arena
 			if($char->energy < 1)
 			{
 				$this->Flash->error("Better check your energy");
-				return $this->redirect(['controller' => 'character', 'action' => 'overview']);
+				return;
 			}
 			
 			//was anderes
 			if($char->actionid != 0)
 			{
 				$this->Flash->error("You are busy");
-				return $this->redirect(['controller' => 'city', 'action' => 'arena']);
+				return;
 			}
 			
-            //calculate restriction
-            //1 (15%)
-            $res["1_low"] = $char->skills->level - floor($char->skills->level * 0.15);
-            $res["1_high"] = $char->skills->level + floor($char->skills->level * 0.15);
-
-            //2 (27%)
-            $res["2_low"] = $char->skills->level - floor($char->skills->level * 0.27);
-            $res["2_high"] = $char->skills->level + floor($char->skills->level * 0.27);
-
-            //3 (39%)
-            $res["3_low"] = $char->skills->level - floor($char->skills->level * 0.39);
-            $res["3_high"] = $char->skills->level + floor($char->skills->level * 0.39);            
-
-            $this->set("res",$res);
             $this->set("open","yes");
 
             if($this->request->is(['post']))
             {
-                $posts = $this->request->getData();
-                //calccosts
-                $cost = 0;
+                $posts = $this->request->getData()["formData"];
                 
-                $choosen_res = $posts["restriction"];
-                $choosen_type = $posts["type"];
+                $choosen_res = $posts["res"];
+				$choosen_type = $posts["type"];
+				$bet = $posts["bet"];
+				$cost = $this->request->getData()["cost"];
                 if(isset($posts["lower"]))  $lower = $posts["lower"];
                 if(isset($posts["higher"])) $higher = $posts["higher"];
-                
-                if ($choosen_type == "duel") { $cost += 2; }
-                if ($choosen_type == "coop") { $cost += 10; }
-              
-                if ($choosen_res == 0) { $cost += 0; }
-                if ($choosen_res == 1 && ($lower == 1 || $higher == 1)) { $cost += 5; }
-                if ($choosen_res == 2 && ($lower == 1 || $higher == 1)) { $cost += 3; }
-                if ($choosen_res == 3 && ($lower == 1 || $higher == 1)) { $cost += 1; }
 
-                if($cost > $char->cash)
+                if(($cost + $bet) > $char->cash)
                 {
-                    $this->Flash->error("Your cannot afford the rent");
-                    return $this->redirect(["action" => "arena"]);
+					$this->Flash->error("Your cannot afford the rent");
+					return;
                 }
 
-                $fight_db = $this->JediFights->newEmptyEntity();
+                $fight_db = $this->JediFights->newEntity();
                 $fight_db->type = $choosen_type;
                 $fight_db->opentime = time();
                 $fight_db->startin = 300;
-                $fight_db->bet = 0;
+                $fight_db->bet = $bet;
                 
                 if(isset($lower) && $lower == 1)
                 {
@@ -735,7 +722,7 @@ class CityController extends AppController {
                 $fight_db->status = "open";
                 $this->JediFights->save($fight_db);
 
-                $fighter_db = $this->JediFightsPlayers->newEmptyEntity();
+                $fighter_db = $this->JediFightsPlayers->newEntity();
                 $fightId = $this->JediFights->find()->last();
                 $fighter_db->fightid = $fightId["fightid"];
                 $fighter_db->userid = $this->Auth->User("id");
@@ -744,15 +731,13 @@ class CityController extends AppController {
                 $fighter_db->npc = "n";
                 $this->JediFightsPlayers->save($fighter_db);
 
-                $char->cash -= $cost;
+                $char->cash -= ($cost + $bet);
                 $char->actionid = 15;
                 $char->targetid = 0;
                 $char->targettime = 0;
 				$char->location = "Arena";
                 $this->JediUserChars->save($char);
-
-                $this->redirect(["action" => "arena"]);
-            }
+			}
         }        
         //Joinen
         if($this->request->getParam('pass') && $this->request->getParam('pass')[0] == "join")
@@ -766,39 +751,39 @@ class CityController extends AppController {
             //Gründe warum man dem fight nicht joinen kann
             if(!empty($this->JediFightsPlayers->find()->where(["userid" => $this->Auth->User("id")])->where(["npc" => "n"])->first()))
             {
-                $this->Flash->error("You are already fighting somewhere else");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("You are already fighting somewhere else");
+				return;
             }
 
             if($fight->status != "open")
             {
-                $this->Flash->error("this fight is already full");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("this fight is already full");
+				return;
             }
 
             if($fight->maxstr < $char->skills->level && $fight->maxstr != 0)
             {
-                $this->Flash->error("Your level is too high");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("Your level is too high");
+				return;
             }
 
             if($fight->minstr > $char->skills->level && $fight->minstr != 0)
             {
-                $this->Flash->error("Your level is too low");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("Your level is too low");
+				return;
             }
 
             if($fight->bet > $char->cash)
             {
-                $this->Flash->error("Your cannot afford the bet");
-                return $this->redirect(["action" => "arena"]);
+				$this->Flash->error("Your cannot afford the bet");
+				return;
             }
 
 			//Keine Energy für Arena
 			if($char->energy < 1)
 			{
 				$this->Flash->error("Better check your energy");
-				return $this->redirect(['controller' => 'character', 'action' => 'overview']);
+				return;
 			}
 			
             if($fight->type == "duel" && $fight->status == "open")
@@ -817,7 +802,7 @@ class CityController extends AppController {
                     $side = 0;
                 }
 
-                $join_player = $this->JediFightsPlayers->newEmptyEntity();
+                $join_player = $this->JediFightsPlayers->newEntity();
                 $join_player->fightid = $fightid;
                 $join_player->userid = $this->Auth->User("id");
                 $join_player->teamid = $side;
@@ -847,8 +832,8 @@ class CityController extends AppController {
                 $count = $query->count();
                 if($count >= 2)
                 {
-                    $this->Flash->error("Team is allready full");
-                    return $this->redirect(["action" => "arena"]);
+					$this->Flash->error("Team is allready full");
+					return;
                 }
                 //belegte Position ermitteln
                 $full_position = $fight_players->select('position')->where(["teamid" => $side])->first();
@@ -867,7 +852,7 @@ class CityController extends AppController {
                     $position = 0;
                 }
 
-                $join_player = $this->JediFightsPlayers->newEmptyEntity();
+                $join_player = $this->JediFightsPlayers->newEntity();
                 $join_player->fightid = $fightid;
                 $join_player->userid = $this->Auth->User("id");
                 $join_player->teamid = $side;
@@ -892,7 +877,6 @@ class CityController extends AppController {
                 }
                 $this->JediFights->save($fight);
             }
-            return $this->redirect(["action" => "arena"]);
         }
         //Cancel
         if($this->request->getParam("pass") && $this->request->getParam("pass")[0] == "cancel")
@@ -902,7 +886,7 @@ class CityController extends AppController {
             //wenn user in gar keinem fight
             if(empty($fight_id["fightid"]))
             {
-                return $this->redirect(["action" => "arena"]);
+				return;
             }
             //remove player from db
             $fight_player = $this->JediFightsPlayers->find()->where(["fightid" => $fight_id["fightid"]])->where(["userid" => $this->Auth->User("id")])->first();
@@ -925,7 +909,6 @@ class CityController extends AppController {
             {
                 $this->JediFights->delete($this->JediFights->get($fight_id["fightid"]));
             }
-            $this->redirect(["action" => "arena"]);
         }
 
         //Alle kämpfe für die Tabelle holen
@@ -971,7 +954,7 @@ class CityController extends AppController {
             $this->set('fighters',$fighters);
         }
 		
-		//Fightid für die counterfunction
+		//Fightid für die countdownfunction
 		$fight_id_for_counter = $this->JediFightsPlayers->find()->select("fightid")->where(["userid" => $this->Auth->User("id")])->first();
 		if(!empty($fight_id_for_counter))
 		{
@@ -982,7 +965,7 @@ class CityController extends AppController {
 			$this->set("user_fight_id_counter",0);
 		}
 		
-		$fight_reps = $this->JediFightReports->find()->where(["type" => "a"])->order(["zeit" => "DESC"])->limit(20);
+		$fight_reps = $this->JediFightReports->find()->select(["zeit", "headline", "md5"])->where(["type" => "a"])->order(["zeit" => "DESC"])->limit(20);
         $this->set("fight_reps",$fight_reps);
     }
 
@@ -1062,7 +1045,6 @@ class CityController extends AppController {
 			
             $this->JediUserChars->save($char);
             $this->JediNpcChars->save($barman);
-            $this->redirect(["action" => "bar"]);
         }
     }
 	
@@ -1100,9 +1082,7 @@ class CityController extends AppController {
 			}
 			else
 			{
-				$this->Flash->error("you doing something else");
 				$open = false;
-				return $this->redirect(["action" => "apa"]);
 			}
 			
 			if($duration > 6) $duration = 6;
@@ -1117,8 +1097,6 @@ class CityController extends AppController {
 			$apa->sleepingsince = time();
 			$apa->sleepingfor = $sleeptime;
 			$this->JediCityApartments->save($apa);
-			
-			$this->redirect(["action" => "apa"]);
 		}
 		
 		if($char->actionid == 1)
@@ -1194,13 +1172,13 @@ class CityController extends AppController {
 				$apa->sleepingsince = 0;
 				$apa->sleepingfor = 0;
 				$this->JediCityApartments->save($apa);
-				
-				return $this->redirect(["action" => "apa"]);
 			}
+
 			if($apa->sleep == "yes")
 			{
 				$progress = ($apa->sleepingfor - $lefttime) * 100 / $apa->sleepingfor;
 				$this->set("progress",$progress);
+				$this->set("duration",$apa->sleepingfor);
 			}
 			$this->set("timer",$lefttime);
 		}

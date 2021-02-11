@@ -13,7 +13,10 @@
  * @license   https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace App\Controller;
-
+use Cake\Event\EventInterface;
+use Cake\ORM\TableRegistry;
+use Cake\I18n\FrozenTime;
+use Cake\Datasource\ConnectionManager;
 use Rest\Controller\RestController;
 use Rest\Utility\JwtToken;
 
@@ -48,12 +51,15 @@ class TestController extends RestController
         // erstelle den jwt token mit dem obigen payload, kann man sich wie ne session datei vorstellen
         // die eigenarten bei JWT musst die frontend seitig in der fetch.js ansehen.
         $token = JwtToken::generate($payload);
-        $this->set("request",$this->request->getData());
         $user = $this->Auth->identify();
         if ($user) {
             $this->Auth->setUser($user);
             $this->set("user",$this->Auth->user());
             $this->set(compact('token'));
+
+            $connection = ConnectionManager::get('default');
+            $username = $connection->execute('SELECT username FROM jedi_user_chars WHERE userid = :id', ['id' => $_SESSION["Auth"]["User"]["id"]])->fetch('assoc');
+            $this->set("username",$username);
         }
         else {
             $this->set("error","wrong username or password");
@@ -71,5 +77,60 @@ class TestController extends RestController
         $payload = $this->payload; // der payload eingetragen im login
         $this->set('hello', 'muahah');
         $this->set('payload', $payload);
+    }
+
+    public function sse() {
+
+        // set headers for stream
+        header("Content-Type: text/event-stream");
+        header("Cache-Control: no-cache");
+        header("Access-Control-Allow-Origin: *");
+
+        // Is this a new stream or an existing one?
+        $lastEventId = floatval(isset($_SERVER["HTTP_LAST_EVENT_ID"]) ? $_SERVER["HTTP_LAST_EVENT_ID"] : 0);
+        if ($lastEventId == 0) {
+            $lastEventId = floatval(isset($_GET["lastEventId"]) ? $_GET["lastEventId"] : 0);
+        }
+
+        echo ":" . str_repeat(" ", 2048) . "\n"; // 2 kB padding for IE
+        echo "retry: 2000\n";
+
+        // start stream
+        while(true){
+
+            if(connection_aborted()){
+                exit();
+            }
+
+            else{
+
+                // here you will want to get the latest event id you have created on the server, but for now we will increment and force an update
+                $latestEventId = 1;
+
+                if($lastEventId < $latestEventId)
+                {
+                    echo "id: " . $latestEventId . "\n";
+                    echo "data: Howdy (".$latestEventId.") \n\n";
+                    $lastEventId = $latestEventId;
+                    ob_flush();
+                    flush();
+
+                }
+
+                else{
+                
+                    // no new data to send
+                    echo ": heartbeat\n\n";
+                    ob_flush();
+                    flush();
+                    
+                }
+
+            }
+    
+            // 2 second sleep then carry on
+            sleep(2);
+
+        }      
     }
 }

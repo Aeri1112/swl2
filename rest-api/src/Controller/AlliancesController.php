@@ -5,6 +5,7 @@ namespace App\Controller;
 use Cake\Mailer\Mailer;
 use Cake\Event\EventInterface;
 use Cake\I18n\FrozenTime;
+use Rest\Controller\RestController;
 
 /**
  * Accounts Controller
@@ -13,21 +14,16 @@ use Cake\I18n\FrozenTime;
  *
  * @method \App\Model\Entity\Account[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
-class AlliancesController extends AppController
+class AlliancesController extends RestController
 {
-	public function beforeFilter(EventInterface $event)
+	public function initialize(): void
     {
-        $this->viewBuilder()->setLayout('main');	
+		parent::initialize();
 		$this->loadModel("JediUserChars");
 		$this->loadModel("JediUserSkills");	
 		$this->loadModel("JediAlliances");		
 		$this->loadModel("JediFightsPlayers");
 		$this->loadModel("JediFights");
-    }
-	
-	public function initialize(): void
-    {
-        parent::initialize();
         $this->loadComponent('maxHealth');
         $this->loadComponent('Paginator');
     }
@@ -41,12 +37,16 @@ class AlliancesController extends AppController
 		if($char->alliance == 0)
 		{
 			$no_alliance = true;
+			//List all allis
+			$alliances = $this->JediAlliances->find();
+			$alliances = $alliances->selectAllExcept($this->JediAlliances,["cash","attemps","last_reset","password"]);
+			$this->set("alliances",$this->paginate($alliances));
 		}
 		else
 		{
 			$no_alliance = false;
 			
-			$alliance = $this->JediAlliances->get($char->alliance);
+			$alliance = $this->JediAlliances->find()->select(["id","pic","description","name","short","last_reset"])->where(["id" => $char->alliance])->first();
 			$this->set("alliance",$alliance);
 			
 			//rejuice raid
@@ -86,17 +86,13 @@ class AlliancesController extends AppController
 			}
 		}
 		$this->set("no_alliance",$no_alliance);
-		
-		
-		//List all allis
-		$alliances = $this->JediAlliances->find();
-		$this->set("alliances",$this->paginate($alliances));
 	}
 	
 	public function all()
 	{
 		//List all allis
 		$alliances = $this->JediAlliances->find();
+		$alliances = $alliances->selectAllExcept($this->JediAlliances,["cash","attemps","last_reset","password"]);
 		$this->set("alliances",$this->paginate($alliances));
 	}
 	
@@ -175,28 +171,24 @@ class AlliancesController extends AppController
 			$time = FrozenTime::now();
 			if($char->alli_cooldown > $time)
 			{
-				$this->Flash->error("Your cooldown is not over");
+				$this->set("error","Your cooldown is not over");
 			}
 			elseif($this->request->getData("password") == $alliance->password)
 			{
 				$char->alliance = $id;
 				$this->JediUserChars->save($char);
-				
-				$this->redirect(["action" => "index"]);
 			}
 			else
 			{
-				$this->Flash->error("Wrong Password");
+				$this->set("error","Wrong password");
 			}
 		}
-		
-		$this->set("alliance",$alliance);
 		$this->set("no_alliance",$no_alliance);
 	}
 	
 	public function view($id)
 	{	
-		$alliance = $this->JediAlliances->get($id);
+		$alliance = $this->JediAlliances->find()->select(["id","coleader","leader","name","short"])->where(["id" => $id])->first();
 		
 		//actions
 		if($this->request->is("post"))
@@ -204,7 +196,7 @@ class AlliancesController extends AppController
 			$change_user = $this->request->getData("userid");
 			
 			//change leader
-			if($this->request->getData("leader") == "on" && $this->Auth->User("id") == $alliance->leader)
+			if($this->request->getData("selectedOption") == "leader" && $this->Auth->User("id") == $alliance->leader)
 			{
 				//Prüfung ob der Char Coleader ist. Dann Coleader auf 0 setzen
 				if($alliance->coleader == $change_user)
@@ -215,7 +207,7 @@ class AlliancesController extends AppController
 				$this->JediAlliances->save($alliance);
 			}
 			//change coleader
-			elseif($this->request->getData("coleader") == "on" && ($this->Auth->User("id") == $alliance->coleader OR $this->Auth->User("id") == $alliance->leader))
+			elseif($this->request->getData("selectedOption") == "coleader" && ($this->Auth->User("id") == $alliance->coleader OR $this->Auth->User("id") == $alliance->leader))
 			{
 				//Prüfung ob der Char nicht schon Leader oder Coleader ist
 				if($alliance->leader != $change_user && $alliance->coleader != $change_user)
@@ -225,7 +217,7 @@ class AlliancesController extends AppController
 				}				
 			}
 			//kick
-			elseif($this->request->getData("kick") == "on" && ($this->Auth->User("id") == $alliance->coleader OR $this->Auth->User("id") == $alliance->leader))
+			elseif($this->request->getData("selectedOption") == "kick" && ($this->Auth->User("id") == $alliance->coleader OR $this->Auth->User("id") == $alliance->leader))
 			{
 				$change_user_model = $this->JediUserChars->get($change_user);
 				
@@ -285,7 +277,7 @@ class AlliancesController extends AppController
 		if($char->alliance == 0)
 		{
 			$no_alliance = true;
-			return $this->redirect(["controller" => "character", "action" => "overview"]);
+			return;
 		}
 		else
 		{
@@ -347,15 +339,13 @@ class AlliancesController extends AppController
         if($this->request->getParam("pass") && $this->request->getParam("pass")[0] == "cancel")
         {
             //get fight
-            $fight_id = $this->JediFightsPlayers->find()->select("fightid")->where(["userid" => $this->Auth->User("id")])->first();
-            //wenn user in gar keinem fight
-            if(empty($fight_id->fightid))
-            {
-                return $this->redirect(["action" => "index"]);
-            }
+            $fight_id = $this->JediFightsPlayers->find()->select("fightid")->where(["userid" => $this->request->getData("userid")])->first();
+
             //remove player from db
-            $fight_player = $this->JediFightsPlayers->find()->where(["fightid" => $fight_id->fightid])->where(["userid" => $this->Auth->User("id")])->first();
+            $fight_player = $this->JediFightsPlayers->find()->where(["fightid" => $fight_id->fightid])->where(["userid" => $this->request->getData("userid")])->first();
             $this->JediFightsPlayers->delete($fight_player);
+
+			$char = $this->JediUserChars->get($this->request->getData("userid"));
 
 			$char->actionid = 0;
 			$char->targetid = 0;
@@ -373,7 +363,6 @@ class AlliancesController extends AppController
 				$alliance->attemps += 1;
 				$this->JediAlliances->save($alliance);
             }
-            $this->redirect(["action" => "index"]);
         }
 		
 		//Join
@@ -382,19 +371,19 @@ class AlliancesController extends AppController
 			if(!empty($this->JediFightsPlayers->find()->where(["userid" => $this->Auth->User("id")])->where(["npc" => "n"])->first()))
             {
                 $this->Flash->error("You are already fighting somewhere else");
-                return $this->redirect(["action" => "index"]);
+                return;
             }
 			if($char->actionid != 0 OR $char->targetid != 0 OR $char->targettime != 0)
             {
                 $this->Flash->error("You are doing something else");
-                return $this->redirect(["action" => "index"]);
+                return;
             }
 			
 			$fight_id = $this->JediFights->find()->where(["alliance" => $char->alliance])->where(["status" => "open"])->first();
 			
 			if($fight_id != null)
 			{
-				$player = $this->JediFightsPlayers->newEmptyEntity();
+				$player = $this->JediFightsPlayers->newEntity();
 				$player->fightid = $fight_id->fightid;
 				$player->userid = $char->userid;
 				$player->teamid = 0;
@@ -407,7 +396,6 @@ class AlliancesController extends AppController
 				$char->tmpcast = 0;
 				$this->JediUserChars->save($char);
 			}
-			return $this->redirect(["action" => "raid"]);
 		}
 		
 		//start
@@ -442,13 +430,11 @@ class AlliancesController extends AppController
 					$member->location2 = $location2;
 					$this->JediUserChars->save($member);
 				}
-				
-				$this->redirect(["controller" => "city", "action" => "layer"]);
 			}
 			else
 			{
 				$this->Flash->error("You are not allowed to start a raid");
-				return $this->redirect(["action" => "index"]);
+				return;
 			}
 		}
 		$this->set("no_alliance",$no_alliance);
@@ -459,20 +445,20 @@ class AlliancesController extends AppController
 			if(!empty($this->JediFightsPlayers->find()->where(["userid" => $this->Auth->User("id")])->where(["npc" => "n"])->first()))
             {
                 $this->Flash->error("You are already fighting somewhere else");
-                return $this->redirect(["action" => "index"]);
+                return;
             }
 			
 			if($alliance->leader != $char->userid && $alliance->coleader != $char->userid)
 			{
 				$this->Flash->error("You are not allowed to start a raid");
-				return $this->redirect(["action" => "index"]);
+				return;
 			}
 		
 			if($alliance->attemps > 0)
 			{
 				$npcid = $this->request->getData("npc");
 				
-				$fight = $this->JediFights->newEmptyEntity();
+				$fight = $this->JediFights->newEntity();
 				$fight->type = "coopnpc";
 				$fight->alliance = $alliance->id;
 				$fight->startin = 600;
@@ -481,7 +467,7 @@ class AlliancesController extends AppController
 				$this->JediFights->save($fight);
 				$fight_id = $this->JediFights->find()->last()->fightid;
 				
-				$players = $this->JediFightsPlayers->newEmptyEntity();
+				$players = $this->JediFightsPlayers->newEntity();
 				$players->fightid = $fight_id;
 				$players->userid = $char->userid;
 				$players->teamid = 0;
@@ -494,7 +480,7 @@ class AlliancesController extends AppController
 				$char->targetid = 2;
 				$this->JediUserChars->save($char);
 				
-				$players = $this->JediFightsPlayers->newEmptyEntity();
+				$players = $this->JediFightsPlayers->newEntity();
 				$players->fightid = $fight_id;
 				$players->userid = $npcid;
 				$players->teamid = 1;
@@ -504,8 +490,6 @@ class AlliancesController extends AppController
 				
 				$alliance->attemps -= 1;
 				$this->JediAlliances->save($alliance);
-				
-				$this->redirect(["action" => "raid"]);
 			}
 			else
 			{
@@ -532,7 +516,6 @@ class AlliancesController extends AppController
 			$this->JediAlliances->save($alliance);
 		}
 		$this->JediUserChars->save($char);
-		$this->redirect(["action" => "index"]);
 	}
 	
 	public function research()

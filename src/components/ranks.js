@@ -16,12 +16,9 @@ class Ranks extends React.Component {
         const ranks = this.props;
 
         return (
-            ranks.ranks.map(content => ((content.id === this.props.rank) && (content.side === side)) ? (
-                <>{content.rank}</>
-                    ) : (
-                <></>
-                    )
-                )
+            
+            ranks.ranks.map(content => +content.id === this.props.rank && content.side === side ?
+                content.rank : null)
         )
     }
 }

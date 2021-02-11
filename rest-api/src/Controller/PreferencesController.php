@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 use Cake\Event\EventInterface;
+use Rest\Controller\RestController;
+
 
 /**
  * Accounts Controller
@@ -9,21 +11,15 @@ use Cake\Event\EventInterface;
  *
  * @method \App\Model\Entity\Account[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
-class PreferencesController extends AppController
+class PreferencesController extends RestController
 {
-	public function beforeFilter(EventInterface $event)
-    {
-        $this->viewBuilder()->setLayout('main');
-		$this->loadModel("JediUserChars");
-		$this->loadModel("JediUserSkills");
-    }
-	/*
 	public function initialize(): void
     {
         parent::initialize();
-        $this->loadComponent('Quest');
+		$this->loadModel("JediUserChars");
+		$this->loadModel("JediUserSkills");
     }
-	*/
+	
 	public function fight()
 	{
 		$member = $this->JediUserChars->get($this->Auth->User("id"));
@@ -31,15 +27,16 @@ class PreferencesController extends AppController
 		
 		if($this->request->is("post"))
 		{
-			$input = $this->request->getData();
+			$input = $this->request->getData()["formData"];
+			$this->set("input",$input);
 			
-			if (!isset($input["kill2"]))
+			if (!isset($input["switchoff_2"]))
 			{
-				$input["kill2"] = "";
+				$input["switchoff_2"] = "";
 			}
-			if (!isset($input["kill3"]))
+			if (!isset($input["switchoff_3"]))
 			{
-				$input["kill3"] = "";
+				$input["switchoff_3"] = "";
 			}
 			
 			$db_input = implode(",",$input);
