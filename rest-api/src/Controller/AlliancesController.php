@@ -24,6 +24,7 @@ class AlliancesController extends RestController
 		$this->loadModel("JediAlliances");		
 		$this->loadModel("JediFightsPlayers");
 		$this->loadModel("JediFights");
+		$this->loadModel("Accounts");
         $this->loadComponent('maxHealth');
         $this->loadComponent('Paginator');
     }
@@ -266,6 +267,11 @@ class AlliancesController extends RestController
 	function get_alli_member($id)
 	{
 		$alli_member = $this->JediUserChars->find()->where(["alliance" => $id])->order(["username"])->all();
+		foreach ($alli_member as $key => $value) {
+			$last_acc = $this->Accounts->get($value->userid)->last_activity->wasWithinLast("5 minutes");
+			
+			$value->online = $last_acc;
+		}
 		return $alli_member;
 	}
 	
@@ -326,6 +332,7 @@ class AlliancesController extends RestController
 			}
 			$this->set("raid_members",$members);
 		}
+
 		if($char->userid == $alliance->leader OR $char->userid == $alliance->coleader)
 		{
 			$this->set("is_leader",true);
@@ -361,6 +368,9 @@ class AlliancesController extends RestController
 				$this->JediFightsPlayers->delete($this->JediFightsPlayers->find()->where(["npc" => "y"])->where(["fightid" => $fight_id->fightid])->first());
 				
 				$alliance->attemps += 1;
+				if($alliance->attemps >= 5) {
+					$alliance->attemps = 5;
+				}
 				$this->JediAlliances->save($alliance);
             }
         }
@@ -397,7 +407,66 @@ class AlliancesController extends RestController
 				$this->JediUserChars->save($char);
 			}
 		}
+		//add
+		if($this->request->getParam("pass") && $this->request->getParam("pass")[0] == "add")
+		{
+			$char = $this->JediUserChars->get($this->request->getData("userid"));
+
+			if(!empty($this->JediFightsPlayers->find()->where(["userid" => $this->request->getData("userid")])->where(["npc" => "n"])->first()))
+            {
+                $this->Flash->error("You are already fighting somewhere else");
+                return;
+            }
+			if($char->actionid != 0 OR $char->targetid != 0 OR $char->targettime != 0)
+            {
+                $this->Flash->error("You are doing something else");
+                return;
+            }
+			
+			$fight_id = $this->JediFights->find()->where(["alliance" => $char->alliance])->where(["status" => "open"])->first();
+			
+			if($fight_id != null)
+			{
+				$player = $this->JediFightsPlayers->newEntity();
+				$player->fightid = $fight_id->fightid;
+				$player->userid = $this->request->getData("userid");
+				$player->teamid = 0;
+				$player->position = 0;
+				$player->npc = "n";
+				$this->JediFightsPlayers->save($player);
+				
+				$char->actionid = 1;
+				$char->targetid = 2;
+				$char->tmpcast = 0;
+				$this->JediUserChars->save($char);
+			}
+		}
+
+		//get Free alli members to join
+		$free_members = $this->JediUserChars->find()->select(["userid"])->where(["alliance" => $alliance->id, "actionid" => 0, "targetid" => 0, "targettime" => 0])->all();
 		
+		if(!$free_members->isEmpty()) {
+			$i = 0;
+				foreach($free_members as $key => $free_member)
+				{
+					$this->LoadModel('JediItemsJewelry');
+					$jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $free_member->userid]);
+					
+					$this->LoadModel('JediItemsWeapons');
+					$weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $free_member->userid]);        
+		
+					$fmembers[$i] = $this->JediUserChars->get($free_member->userid);
+					$fmembers[$i]->skills = $this->JediUserSkills->get($free_member->userid);
+					
+					$fmembers[$i]->MaxHealth = $this->maxHealth->calc_maxHp($fmembers[$i]->skills->cns, $fmembers[$i]->skills->level, $jewelry_model, $weapons_model);
+					$fmembers[$i]->MaxMana = $this->maxHealth->calc_maxMana($fmembers[$i]->skills->spi, $fmembers[$i]->skills->itl, $fmembers[$i]->skills->level, $jewelry_model, $weapons_model);
+					
+					$fmembers[$i]->HealthPro = round($fmembers[$i]->health * 100 / $fmembers[$i]->MaxHealth);
+					$fmembers[$i]->ManaPro = round($fmembers[$i]->mana * 100 / $fmembers[$i]->MaxMana);
+					$i++;
+				}
+			$this->set("free_members",$fmembers);
+		}
 		//start
 		if($this->request->getParam("pass") && $this->request->getParam("pass")[0] == "start")
 		{

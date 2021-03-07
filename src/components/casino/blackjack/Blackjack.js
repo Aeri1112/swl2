@@ -31,6 +31,8 @@ const Blackjack = () => {
     const [bet, setBet] = useState(1);
     const [PlayerHandStatus, setPlayerHandStatus] = useState("");
     const [softCount, setSoftCount] = useState(false);
+    const [streak, setStreak] = useState(0);
+    const [win, setWin] = useState(0);
 
     const [SplitStatus, setSplitStatus] = useState("active")
     const [SplitCards, setSplitCards] = useState([]);
@@ -61,11 +63,10 @@ const Blackjack = () => {
         }
     };
 
-    const SaveData = async () => {
+    const SaveData = async (win) => {
         setSaving(true);
         try {
-            const response = await POST('/character/saveuser', {where:"char", what:"cash", amount:cash})
-            console.log(response)
+            const response = await POST('/character/saveuser', {where:"char", what:"cash", amount:win})
         } catch (e) {
             console.error(e)
         } finally {
@@ -108,7 +109,6 @@ const Blackjack = () => {
     //Dealing
     useEffect(() => {
         if (isDealing) {
-            console.log(Deck)
             const Card1 = Deck.pop();
             const Card2 = Deck.pop();
             const Card3 = Deck.pop();
@@ -150,7 +150,7 @@ const Blackjack = () => {
         }
         else if (gameStatus === "finish") {
             whoWins();
-            SaveData();
+            //SaveData(win);
         }
     }, [gameStatus, DealerCards])
 
@@ -233,6 +233,7 @@ const Blackjack = () => {
     }
 
     const handleClickInsurance = () => {
+        let stats = {};
         //Versicherung abziehen zwischenspeichern
         let cashFlow = -(bet / 2);
         setInsuranceAv(false);
@@ -244,6 +245,8 @@ const Blackjack = () => {
             cashFlow += (bet * 1.5);
             countDealersCards();
             setGameStatus("finish")
+            stats["ins"] = 1;
+            POST("/statistics/setstat",{stats:stats});
         }
         else {
             setDealerNoBJ(true);
@@ -462,42 +465,72 @@ const Blackjack = () => {
         }
     }
 
-    const whoWins = () => {
+    const whoWins = async () => {
+        let stats = {};
         let win = 0;
+        let streakInFunc = streak;
+
+        stats["bj21"] = 0;
+        stats["double"] = 0;
+        stats["hand"] = 1;
 
         if(PlayerStatus === "bust") {
             setPlayerHandStatus("bust!")
+            streakInFunc = 0;
         }
         else if (DealerStatus === "bust") {
+            streakInFunc += 1;
             setPlayerHandStatus("wins!")
             win += (bet * 2);
+            stats["win"] = 1;
+            if(PlayerIsDouble) {
+                stats["double"] += 1;
+            }
         }
 
         if(SplitStatus === "bust") {
             setSplitHandStatus("bust!")
         }
-        else if (DealerStatus === "bust") {
+        else if (DealerStatus === "bust" && split === true) {
             setSplitHandStatus("wins!")
             win += (SplitBet * 2);
+            stats["split"] = 1;
+            if(SplitIsDouble) {
+                stats["double"] += 1;
+            }
         }
 
         if(DealerCardsCount > PlayerCardsCount && DealerStatus !== "bust" && DealerStatus !== "BJ") {
             setPlayerHandStatus("lose!")
+            streakInFunc = 0;
         }
         else if (DealerCardsCount < PlayerCardsCount && PlayerStatus !== "bust" && PlayerStatus !== "BJ") {
+            streakInFunc += 1;
             setPlayerHandStatus("wins!")
             win += (bet * 2);
+            stats["win"] = 1;
+            if(PlayerIsDouble) {
+                stats["double"] += 1;
+            }
         }
         else if (DealerStatus === "BJ" && PlayerStatus === "BJ") {
             setPlayerHandStatus("push!")
             win += (bet)
+            stats["bj21"] += 1;
         }
         else if (DealerStatus === "BJ" && PlayerStatus !== "BJ") {
             setPlayerHandStatus("lose!")
+            streakInFunc = 0;
         }
         else if (DealerStatus !== "BJ" && PlayerStatus === "BJ") {
+            streakInFunc += 1;
             setPlayerHandStatus("wins with BJ!")
             win += (bet * 2.5)
+            stats["win21"] = 1;
+            stats["bj21"] += 1;
+            if(PlayerIsDouble) {
+                stats["double"] += 1;
+            }
         }
         else if (DealerCardsCount === PlayerCardsCount) {
             setPlayerHandStatus("push")
@@ -511,10 +544,15 @@ const Blackjack = () => {
             else if (DealerCardsCount < SplitCardsCount && SplitStatus !== "bust" && SplitStatus !== "BJ") {
                 setSplitHandStatus("wins!")
                 win += (SplitBet * 2);
+                stats["split"] = 1;
+                if(SplitIsDouble) {
+                    stats["double"] += 1;
+                }
             }
             else if (DealerStatus === "BJ" && SplitStatus === "BJ") {
                 setSplitHandStatus("push!")
                 win += (SplitBet)
+                stats["bj21"] += 1;
             }
             else if (DealerStatus === "BJ" && SplitStatus !== "BJ") {
                 setSplitHandStatus("lose!")
@@ -522,6 +560,11 @@ const Blackjack = () => {
             else if (DealerStatus !== "BJ" && SplitStatus === "BJ") {
                 setSplitHandStatus("wins with BJ!")
                 win += (SplitBet * 2.5)
+                stats["split21"] = 1;
+                stats["bj21"] += 1;
+                if(SplitIsDouble) {
+                    stats["double"] += 1;
+                }
             }
             else if (DealerCardsCount === SplitCardsCount) {
                 setSplitHandStatus("push")
@@ -530,6 +573,7 @@ const Blackjack = () => {
         }
         
         setCash(cash + win);
+        setStreak(streakInFunc);
 
         if(PlayerIsDouble === true) {
             setPlayerIsDouble(false);
@@ -540,11 +584,15 @@ const Blackjack = () => {
             setSplitIsDouble(false);
             setBet(SplitBet / 2);
         }
+        stats["cash"] = win - bet;
+        const cashFlow = win - bet;
+        await POST('/character/saveuser', {where:"char", what:"cash", amount:cashFlow})
+        await POST("/statistics/setstat",{stats:stats, streak:streakInFunc}); 
     }
 
     const changeBet = (e) => {
         const regex=/^[0-9]+$/;
-        if (e.target.value.match(regex) && e.target.value > 0 && e.target.value <= cash)
+        if (e.target.value.match(regex) && e.target.value > 0 && e.target.value <= cash && e.target.value <= 100)
         {
             setBet(+e.target.value);
         }
@@ -696,7 +744,7 @@ const Blackjack = () => {
                     onChange={changeBet}
                     value={bet}
                 />
-                Enter Bet and push Deal</div> 
+                Enter Bet and push Deal (max. 100 Cr.)</div> 
                 <Button
                     variant="primary"
                     disabled={bet > 0 && bet <= cash && !saving ? false : true}

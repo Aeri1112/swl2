@@ -40,6 +40,9 @@ class JediUserSkillsTable extends Table
         $this->setTable('jedi_user_skills');
         $this->setDisplayField('userid');
         $this->setPrimaryKey('userid');
+        $this->belongsTo('JediUserChars')
+            ->setForeignKey('userid')
+            ->setJoinType('INNER');
     }
 
     /**

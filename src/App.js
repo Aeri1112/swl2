@@ -9,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Col from "react-bootstrap/Col";
 //loading components
-import Nav from './components/Nav';
+import Navi from './components/Nav';
 import Overview from './components/overview';
 import Abis from './components/abilities';
 import Forces from "./components/forces";
@@ -26,7 +26,14 @@ import All from "./components/alliance/all";
 import View from "./components/alliance/view";
 import Arena from "./components/city/arena";
 
+import Messages from "./components/messages/index";
+
 import Preferences from "./components/pref/preferences";
+
+import Stats from "./components/stats/stats";
+  import Players from "./components/stats/player";
+
+import Elo from "./components/events/elo";
 
 import Chat from "./components/chat";
 import { Row } from 'react-bootstrap';
@@ -39,7 +46,7 @@ const App = () => {
         <Router>
           {
             isAuth !== "false" ?
-              <Nav />
+              <Navi />
             : <Redirect to="/login" />
           }
           <Switch>
@@ -63,7 +70,15 @@ const App = () => {
                     <Route path="/alliance/view" component={View} />
                   <Route path="/arena" component={Arena} />
 
+                  <Route path="/messages" component={Messages} />
+
                   <Route path="/pref" component={Preferences}/>
+
+                  <Route path="/statistics" exact component={Stats}/>
+                    <Route path="/statistics/players" component={Players} />
+
+                  <Route path="/events/rank" component={Elo} />
+
               </Col>
               <Col md={"3"}>
               {

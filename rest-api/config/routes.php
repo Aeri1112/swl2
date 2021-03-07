@@ -78,6 +78,18 @@ Router::scope('/', function (RouteBuilder $routes) {
     $routes->connect('/preferences/fight', ['controller' => 'Preferences', 'action' => 'fight', 'isRest' => true, 'requireAuthorization' => true]);
     
     $routes->connect('/alliances', ['controller' => 'Alliances', 'action' => 'index', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/alliances/raid', ['controller' => 'Alliances', 'action' => 'raid', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/alliances/view', ['controller' => 'Alliances', 'action' => 'view', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/alliances/leave', ['controller' => 'Alliances', 'action' => 'leave', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/alliances/all', ['controller' => 'Alliances', 'action' => 'all', 'isRest' => true, 'requireAuthorization' => true]);
+
+
+
+    $routes->connect('/statistics/get/:id', ['controller' => 'Statistics', 'action' => 'get', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/statistics/ranking', ['controller' => 'Statistics', 'action' => 'ranking', 'isRest' => true, 'requireAuthorization' => true]);
+    $routes->connect('/statistics/setstat', ['controller' => 'Statistics', 'action' => 'setstat', 'isRest' => true, 'requireAuthorization' => true]);
+
+
     /*
      * ...and connect the rest of 'Pages' controller's URLs.
      */

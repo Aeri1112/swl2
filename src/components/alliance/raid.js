@@ -86,6 +86,13 @@ const Raid = () => {
         }
     }
 
+    const handleAdd = async (userid) => {
+        const request = await POST("/alliances/raid/add",{userid:userid})
+        if (request) {
+            loadingAllianceData();
+        }
+    }
+
     useEffect(() => {
         loadingAllianceData();
         loadingCharData();
@@ -106,7 +113,7 @@ const Raid = () => {
                                 {
                                     AlliData.AlliData.raid_members.map((element) => {
                                         return (
-                                            <div className='col-sm-3 pb-1 pr-1' style={{minHeight:"100px"}}>
+                                            <div className='col-sm-3 pb-1 pr-1' style={{minHeight:"100px",marginLeft:"10px",borderRadius:"20px",backgroundColor:"gainsboro"}}>
                                                 <div className="progress progress-bar-vertical" >
                                                     <div className="progress-bar progress-bar-striped bg-danger" role="progressbar" style={{height: element.HealthPro+"%"}} aria-valuenow={element.HealthPro} aria-valuemin="0" aria-valuemax="100">
                                                     </div>
@@ -160,6 +167,44 @@ const Raid = () => {
                             Die Teilnehmer sind bereits gestartet
                         </div>
                     }
+                    {
+                        //Freie Mitglieder die joinen können
+                        AlliData.AlliData.alli_fight !== null && AlliData.AlliData.free_members &&
+                        <div>
+                            <hr/>
+                            <div className="text-center">
+                                In unserer Lounge hängen folgende Charaktere ab und würden sich unserer Jagd anschließen wollen
+                            </div>
+                            <div className="row">
+                                {
+                                    AlliData.AlliData.free_members.map((element) => {
+                                        return (
+                                            <div className='col-sm-3 pb-1 pr-1 pt-1' style={{minHeight:"100px",marginLeft:"10px",borderRadius:"20px",backgroundColor:"gainsboro"}}>
+                                                <div className="progress progress-bar-vertical" >
+                                                    <div className="progress-bar progress-bar-striped bg-danger" role="progressbar" style={{height: element.HealthPro+"%"}} aria-valuenow={element.HealthPro} aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <div className="progress progress-bar-vertical">
+                                                    <div className="progress-bar progress-bar-striped bg-primary " role="progressbar" style={{height: element.ManaPro+"%"}} aria-valuenow={element.ManaPro} aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <div className='col-sm-auto'>
+                                                    <div>{`Name: ${element.username}`}</div>
+                                                    <div>{`Level: ${element.skills.level}`}</div>
+                                                    {
+                                                        AlliData.AlliData.is_leader === true && char.user.char.userid !== element.userid &&
+                                                        <div>
+                                                            <Button onClick={() => handleAdd(element.userid)} className="p-0 border-0" variant="link">hinzufügen</Button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+                        </div>
+                    }
                     {<div className="text-center">{"restliche Versuche: " + AlliData.AlliData.alliance.attemps}</div>}
                 </div>
             }
@@ -188,6 +233,10 @@ const Raid = () => {
             {
                 loading === false &&
                 <Alliance_menu alliId={AlliData.AlliData.alliance.id}/>
+            }
+            {
+                loading === true &&
+                "loading..."
             }
         </div> 
     );

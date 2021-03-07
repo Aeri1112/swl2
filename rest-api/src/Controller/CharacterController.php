@@ -50,7 +50,7 @@ class CharacterController extends RestController {
 
         if($where == "char") {
             $char = $this->JediUserChars->get($this->Auth->User("id"));
-            $char[$what] = $amount;
+            $char[$what] += $amount;
             $this->JediUserChars->save($char);
         }
     }
@@ -69,6 +69,22 @@ class CharacterController extends RestController {
         
         $this->LoadModel('JediItemsWeapons');
         $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);        
+
+        //Levelup?
+        if($skills->xp >= $this->calc_xp_next_lvl($skills->level))
+        {
+            $xp_ueberschuss = $skills->xp - $this->calc_xp_next_lvl($skills->level);
+            $this->set('levelUp','ya');
+            $skills->level += 1;
+            $skills->rsp += 5;
+            $skills->rfp += 3;
+            $skills->xp = $xp_ueberschuss;
+            $char->health = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model);
+            $char->mana = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
+            $char->energy = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+			$this->JediUserSkills->save($skills);
+            $this->JediUserChars->save($char);
+        }
 
         $side["perc"] = round((abs($skills->side) / 32768 * 100),2);
         if($skills->side < 0)
@@ -99,6 +115,8 @@ class CharacterController extends RestController {
         $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
         
         $this->set('skills',$skills);
+        $this->set("rsp",$skills->rsp);
+        $this->set("rfp",$skills->rfp);
     }
 
     public function abilities()
@@ -109,8 +127,11 @@ class CharacterController extends RestController {
 
         //dann nochmal die skillpoints abfragen
         $skillPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
-        
+        $forcePoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
+        $skills->rfp = $forcePoints;
+        $skills->rsp = $skillPoints;
         $this->set("rsp",$skillPoints->rsp);
+        $this->set("rfp",$forcePoints->rfp);
         $this->set('skills',$skills);
         
         //skillen
@@ -149,8 +170,10 @@ class CharacterController extends RestController {
 
         //dann nochmal die skillpoints abfragen
         $skillPoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
+        $abiPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
 
         $this->set("rfp",$skillPoints->rfp);
+        $this->set("rsp",$abiPoints->rsp);
         $this->set('skills',$skills);
 
         if($skillPoints->rfp > 0)

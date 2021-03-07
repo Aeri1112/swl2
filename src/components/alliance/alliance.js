@@ -77,6 +77,14 @@ const Alliance = () => {
                             <div className="text-center mb-2">
                                 {"Willkommen bei " + AlliData.AlliData.alliance.name + " (" + AlliData.AlliData.alliance.short + ")"}
                             </div> 
+                            {
+                                AlliData.AlliData.alli_fight !== null &&
+                                <div className="d-flex justify-content-center">Die Teilnahme an einem Raid ist möglich</div>
+                            }
+                            {
+                                AlliData.AlliData.raid_running === true &&
+                                <div className="d-flex justify-content-center">Raid-Gruppe ist bereits gestartet</div>
+                            }
                             <div className='col-auto p-0 d-flex justify-content-center'>
                                 <img className="img-fluid" src={`${AlliData.AlliData.alliance.pic}`} />
                             </div>
@@ -88,7 +96,7 @@ const Alliance = () => {
                     }
                 </div>    
             : 
-                null
+                "loading..."
         }
         {
             loading === false && AlliData.AlliData.no_alliance === true &&

@@ -463,20 +463,20 @@ class CityController extends RestController {
                     $type = "duelnpc";
 
                     //in die DB
-                    $fights = $this->JediFights->newEmptyEntity();
+                    $fights = $this->JediFights->newEntity();
                     $fights->type = $type;
                     $fights->opentime = time();
                     $fights->startin = 300;
                     $this->JediFights->save($fights);
                     $fightId = $this->JediFights->find()->last();
 
-                    $fights_player = $this->JediFightsPlayers->newEmptyEntity();
+                    $fights_player = $this->JediFightsPlayers->newEntity();
                     $fights_player->fightid = $fightId["fightid"];
                     $fights_player->userid = $this->Auth->User("id");
                     $fights_player->teamid = 0;
                     $this->JediFightsPlayers->save($fights_player);
 
-					$fights_player = $this->JediFightsPlayers->newEmptyEntity();
+					$fights_player = $this->JediFightsPlayers->newEntity();
 					$fights_player->fightid = $fightId["fightid"];
 					$fights_player->userid = 8;
 					$fights_player->teamid = 1;
@@ -1243,7 +1243,7 @@ class CityController extends RestController {
 						$this->JediItemsWeapons->save($item);
 					}
 					
-					$log = $this->JediCityAhLog->newEmptyEntity();
+					$log = $this->JediCityAhLog->newEntity();
 					$log->auctionid = $auction->auctionid;
 					$log->itemid = $auction->itemid;
 					$log->itemtype = $auction->itemtype;

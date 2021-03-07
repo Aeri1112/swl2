@@ -4158,6 +4158,12 @@ class FightComponent extends Component
 				{
 					$p->killedGiantRat += 1;
 				}
+                elseif($value->npc == "y" && $value->char->userid == 8) {
+                    $p->killedDroid += 1;
+                }
+                elseif($value->npc == "y" && $value->char->userid == 9) {
+                    $p->killedReek += 1;
+                }
 				
 				if ($i % 2 != 0) 
                 { 
@@ -4306,12 +4312,23 @@ class FightComponent extends Component
                         $event = $this->JediEventsSingleRanking->get($value->char->userid);
                         $event_enemy = $this->JediEventsSingleRanking->get($$loose[0]->userid);
 						
-                        if($event_enemy->points > 0 && $value->userid == $team_0[0]->userid)
+                        if($event_enemy->points > 0)
                         {
-                            $points = floor($event_enemy->points/10);
-                            if($points == 0) $points = 1;
-                            $event->points += $points;
-                            $event_enemy->points -= $points;
+                            //Erwartungswert attacker
+                            $Ea = 1 / (1 + (pow(10,($event_enemy->points - $event->points) / 200)));
+                            $fight_report .= "Ea ".$Ea."<br>";
+                            //Erwartungswert defender
+                            $Eb = 1 - $Ea;
+                            $fight_report .= "Eb ".$Eb."<br>";
+
+                            if ($win == 0) {
+                                $event->points = $event->points + 20 * (1 - $Ea);
+                                $event_enemy->points = $event_enemy->points + 20 * (0 - $Eb);
+                            }
+                            else {
+                                $event->points = $event->points + 20 * (1 - $Eb);
+                                $event_enemy->points = $event_enemy->points + 20 * (0 - $Ea);
+                            }
                             $this->JediEventsSingleRanking->save($event);
                             $this->JediEventsSingleRanking->save($event_enemy);
                         }
@@ -4379,15 +4396,25 @@ class FightComponent extends Component
                             $fight_rep_type = "l";
                             // put win stats to db
                             $statistics->totalwins += 1;
-                            $statistics->npcwins += 1;
+                            
 							if($npcid == 2)
 							{
 								$statistics->killedRat += $value->killedRat;
+                                $statistics->npcwins += 1;
 							}
 							elseif($npcid == 1)
 							{
 								$statistics->killedGiantRat += $value->killedGiantRat;
+                                $statistics->raidwins += 1;
 							}
+                            elseif($npcid == 8) {
+                                $statistics->killedDroid += $value->killedDroid;
+                                $statistics->npcwins += 1;
+                            }
+                            elseif($npcid == 9) {
+                                $statistics->killedReek += $value->killedReek;
+                                $statistics->raidwins += 1;
+                            }
 							
                         }
 
@@ -4657,15 +4684,30 @@ class FightComponent extends Component
                     }
                     elseif(($fight_data->type == "duelnpc" || $fight_data->type == "coopnpc") && $value->npc == "n")
                     {
+                        $statistics->totallosts += 1;
+						$fight_rep_type = "l";
+
                         // put loose stats to db
 						if($npcid == 2)
 						{
 							$statistics->killedRat += $value->killedRat;
+                            $statistics->npclosts += 1;
 						}
+                        elseif($npcid == 1)
+                        {
+                            $statistics->killedGiantRat += $value->killedGiantRat;
+                            $statistics->raidlosts += 1;
+                        }
+                        elseif($npcid == 8) {
+                            $statistics->killedDroid += $value->killedDroid;
+                            $statistics->npclosts += 1;
+                        }
+                        elseif($npcid == 9) {
+                            $statistics->killedReek += $value->killedReek;
+                            $statistics->raidlosts += 1;
+                        }
 						
-                        $statistics->totallosts += 1;
-                        $statistics->npclosts += 1;
-						$fight_rep_type = "l";
+                        
                     }
                     $bonus_1 = (($iteamlevelown / 2.3) * ($iteamlmt / 8.8));
 
@@ -4822,7 +4864,7 @@ class FightComponent extends Component
 
                         $fight_report .= "folgendes Item nimmst du in dein Inventar auf<br>
                         <div class='card' style='width: 12rem;'>
-                        <img src= '..\..\webroot\img\items\\$type\\$img.jpg' class='card-img-top'>".              
+                        <img src= '.\images\items\\$type\\$img.jpg' class='card-img-top'>".              
                         #$this->getController()->Html->image($loot[1]->img.".jpg", ['pathPrefix' => "webroot/img/items/".$loot[1]->type."/", 'class' => 'card-img-top'])."
                             "<div class='card-body'>
                             <h5 class='card-title'>".$loot[1]->name."</h5>
@@ -4900,6 +4942,7 @@ class FightComponent extends Component
                 $this->JediUserChars->save($user);
             }
         }
+        /*
         if ($fight_data->type == "duelnpc" || $fight_data->type == "coopnpc" ) 
         {
             if ($npcid == "2")
@@ -4915,6 +4958,7 @@ class FightComponent extends Component
                 $this->getController()->redirect(['controller' => 'city', 'action' => 'layer', 'view']);
             }
         }
+        */
         if(isset($loot))
         {
             return $loot;

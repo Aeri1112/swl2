@@ -4,12 +4,17 @@ use Cake\Event\EventInterface;
 use Cake\ORM\TableRegistry;
 use Cake\I18n\FrozenTime;
 use Cake\Datasource\ConnectionManager;
+use Rest\Controller\RestController;
 
 
-class EventsController extends AppController {
 
-    public function beforeFilter(EventInterface $event)
+class EventsController extends RestController {
+	
+    public function initialize(): void
     {
+        parent::initialize();
+        $this->loadComponent('Fight');
+		$this->loadComponent("Treasure");
         $this->viewBuilder()->setLayout('main');
 		$this->loadModel("JediUserChars");
         $this->loadModel("JediEventsSingleRanking");
@@ -19,13 +24,6 @@ class EventsController extends AppController {
 		$this->loadModel("JediUserStatistics");
 		$this->loadModel("JediItemsJewelry");
 		$this->loadModel("JediItemsWeapons");
-	}
-	
-    public function initialize(): void
-    {
-        parent::initialize();
-        $this->loadComponent('Fight');
-		$this->loadComponent("Treasure");
     }
 
     public $paginate = [
@@ -36,7 +34,12 @@ class EventsController extends AppController {
     public function ranking()
     {
         $cur_event = $this->JediEvents->find()->where(["type" => "single"])->last();
-        if($cur_event == null) $this->set("no","no");
+        if($cur_event == null) {
+            $this->set("no",true);
+        }
+        else {
+            $this->set("no",false);
+        }
         $this->set("cur_event",$cur_event);
 
         $event = $this->JediEventsSingleRanking->find()->where(["userid" => $this->Auth->User("id")])->first();
@@ -59,9 +62,9 @@ class EventsController extends AppController {
         //beitreten
         if($this->request->getParam("pass") && $this->request->getParam("pass")[0] == "join" && empty($event) && !empty($cur_event))
         {
-            $new = $this->JediEventsSingleRanking->newEmptyEntity();
+            $new = $this->JediEventsSingleRanking->newEntity();
             $new->userid = $this->Auth->User("id");
-            $new->points = 100;
+            $new->points = 500;
             $new->attemps = 5;
             $new->fights = 0;
             $new->last_reset = time();
@@ -70,11 +73,11 @@ class EventsController extends AppController {
             $this->redirect(["action" => "ranking"]);
         }
         //init duel
-        if($this->request->is("post") && $this->request->getData("userid") != "")
+        if($this->request->is("post") && $this->request->getData("userid") != "" && $event->attemps > 0)
         {  
             $userid = $this->request->getData("userid");
             
-            $fight = $this->loadModel("JediFights")->newEmptyEntity();
+            $fight = $this->loadModel("JediFights")->newEntity();
             $fight->type = "duel";
             $fight->type2 = "event";
             $fight->opentime = time();
@@ -83,7 +86,8 @@ class EventsController extends AppController {
             $this->loadModel("JediFights")->save($fight);
             $fightid = $this->loadModel("JediFights")->find()->select(["fightid"])->last();
 
-            $players = $this->loadModel("JediFightsPlayers")->newEmptyEntity();
+            //Attacker
+            $players = $this->loadModel("JediFightsPlayers")->newEntity();
             $players->fightid = $fightid["fightid"];
             $players->userid = $this->Auth->User("id");
             $players->teamid = 0;
@@ -91,13 +95,17 @@ class EventsController extends AppController {
             $players->npc = "n";
             $this->loadModel("JediFightsPlayers")->save($players);
 
-            $players = $this->loadModel("JediFightsPlayers")->newEmptyEntity();
+            //Gegner
+            $players = $this->loadModel("JediFightsPlayers")->newEntity();
             $players->fightid = $fightid["fightid"];
             $players->userid = $userid;
             $players->teamid = 1;
             $players->position = 0;
             $players->npc = "n";
             $this->loadModel("JediFightsPlayers")->save($players);
+            $defender_event = $this->JediEventsSingleRanking->get($userid);
+            $defender_event->fights += 1;
+            $this->JediEventsSingleRanking->save($defender_event);
 
             $fight = $this->Fight->fight($fight["fightid"]);
 
@@ -105,7 +113,6 @@ class EventsController extends AppController {
             $event->attemps -= 1;
             $this->JediEventsSingleRanking->save($event);
 			
-			$this->redirect(["action" => "ranking"]);
         }
 
         //getting fight_reports
@@ -122,7 +129,9 @@ class EventsController extends AppController {
 		
         $this->set("event",$event);
         $this->set("players",$this->paginate($players));
-        $this->set("Auth",$this->Auth->User());
+
+        $player_count = $this->JediEventsSingleRanking->find()->select(["userid", "points", "fights"])->order(["points" => "DESC"])->order(["fights" => "ASC"])->count();
+        $this->set("count",$player_count);
     }
 	
 	public function milestone()

@@ -8,7 +8,6 @@ export default function ChatMessage(props) {
     const classes = props.sender === username ? "message message-personal" : "message";
 
     return (
-          <div>
             <div className={classes}>
                 <div>
                     {
@@ -28,7 +27,6 @@ export default function ChatMessage(props) {
                     {props.date}
                 </div>
             </div>
-        </div>
     )
   }
   

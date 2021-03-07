@@ -40,6 +40,9 @@ class JediUserStatisticsTable extends Table
         $this->setTable('jedi_user_statistics');
         $this->setDisplayField('userid');
         $this->setPrimaryKey('userid');
+        $this->belongsTo('JediUserChars')
+            ->setForeignKey('userid')
+            ->setJoinType('INNER');
     }
 
     /**

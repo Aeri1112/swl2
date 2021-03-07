@@ -22,10 +22,12 @@ const Overview = () => {
             if (response) {
                 dispatch(characterState__setOverviewData(response))
 
-                const masterResponse = await GET(`/character/user?id=${response.char.masterid}`)
-                if (masterResponse) {
-                    dispatch(characterState__setMaster(masterResponse))
-                }
+                if(response.char.masterid !== 0) {
+                    const masterResponse = await GET(`/character/user?id=${response.char.masterid}`)
+                    if (masterResponse) {
+                        dispatch(characterState__setMaster(masterResponse))
+                    }
+                }   
             }
             setLoading(false)
         } 
@@ -75,7 +77,11 @@ const Overview = () => {
                                 {
                                     data.skills.level > 75 ? "Schüler: " : "Meister: "
                                 }
-                                { master.user.char.username + " (" + master.user.skills.level + ")" }
+                                {
+                                    data.char.masterid !== 0 ?
+                                    master.user.char.username + " (" + master.user.skills.level + ")"
+                                    : "keinen"
+                                }
                             </div>
                         </div>
                     </Row>

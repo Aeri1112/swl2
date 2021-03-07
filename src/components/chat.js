@@ -1,31 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {useSelector} from "react-redux";
 import ReactScrollableFeed from "react-scrollable-feed";
-import { Scrollbars } from 'react-custom-scrollbars';
 import ChatMessage from "../tools/chatMessage";
-//import "../tools/chat";
-import firebase from 'firebase/app';
-import "firebase/database";
-
-// Your web app's Firebase configuration
-var firebaseConfig = {
-  apiKey: "AIzaSyCc4rEGglZzKlMQpDBhJ59OwSfBuVbGHKw",
-  authDomain: "swlchat.firebaseapp.com",
-  databaseURL: "https://swlchat.firebaseio.com",
-  projectId: "swlchat",
-  storageBucket: "swlchat.appspot.com",
-  messagingSenderId: "658796691775",
-  appId: "1:658796691775:web:61eb3c0f2af42b6998d38a"
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-const database = firebase.database();
+import {database} from "../tools/firebase";
 
 const Chat = () => {
 
     const dummy = useRef(null);
     const [text, setText] = useState("");
     const [messages, setMessages] = useState();
+
+    const username = useSelector(state => state.user.username);
     
     const scrollToBottom = () => {
       dummy.current.scrollTop = dummy.current.scrollHeight;
@@ -60,7 +45,7 @@ const Chat = () => {
       var day = dt.getDate();
       var year = dt.getFullYear();
       var dtstring =  h + ':' + m + ', ' + day + '.' + month + '.' + year;
-      database.ref('messages').push().set({message: text, dt:dtstring, sender: "Aeri"});
+      database.ref('messages').push().set({message: text, dt:dtstring, sender: username});
       setText("");
     }
 
@@ -81,7 +66,7 @@ const Chat = () => {
       </div>
       <div className="message-box">
         <textarea type="text" className="message-input" id="message" onChange={handleTextChange} value={text} placeholder="Type message..."></textarea>
-        <input type="hidden" id="username" name="username" value="Aeri"></input>
+        <input type="hidden" id="username" name="username" value={username}></input>
         <button type="submit" onClick={onAddMessage} className="message-submit">Send</button>
       </div>
     </div>

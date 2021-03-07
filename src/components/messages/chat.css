@@ -1,0 +1,25 @@
+.chatHeader {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(0,0,0,0.2);
+}
+
+.chatHeaderInfo {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.chatHeaderInfo > h3 {
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.chatHeaderInfo > p {
+    color: khaki;
+}
+
+.chatBody {
+    flex: 1;
+    padding: 30px;
+}

@@ -238,7 +238,7 @@ class TreasureComponent extends Component
             if($type2 != "raid")
             {
                 //Insert in DB-regular
-                $item_db = $this->JediItemsJewelry->newEmptyEntity();
+                $item_db = $this->JediItemsJewelry->newEntity();
                 $item_db->ownerid = $userid;
                 $item_db->position = "inv";
                 $item_db->sizex = 16;
@@ -261,7 +261,7 @@ class TreasureComponent extends Component
             }
             elseif($type2 == "raid")
             {
-                $item_db = $this->JediTreasures->newEmptyEntity();
+                $item_db = $this->JediTreasures->newEntity();
                 $item_db->ownerid = $userid;
                 $item_db->position = "inv";
                 $item_db->type = "rings";
@@ -494,7 +494,7 @@ class TreasureComponent extends Component
 			if($type2 != "raid")
             {
                 //Insert in DB-regular
-                $item_db = $this->JediItemsWeapons->newEmptyEntity();
+                $item_db = $this->JediItemsWeapons->newEntity();
                 $item_db->ownerid = $userid;
                 $item_db->position = "inv";
                 $item_db->sizex = 16;
@@ -519,7 +519,7 @@ class TreasureComponent extends Component
             }
             elseif($type2 == "raid")
             {
-                $item_db = $this->JediTreasures->newEmptyEntity();
+                $item_db = $this->JediTreasures->newEntity();
                 $item_db->ownerid = $userid;
                 $item_db->position = "inv";
                 $item_db->type = "weapons";
@@ -547,7 +547,12 @@ class TreasureComponent extends Component
 		if($type_of_creation != "price")
 		{
 			$statistics = $this->JediUserStatistics->get($userid);
-			$statistics->loots += 1;
+            if($lootitem != "giant-rat" && $lootitem != "reek") {
+                $statistics->loots += 1;
+            }
+			elseif($lootitem == "reek" OR $lootitem == "giant-rat") {
+                $statistics->raidloots += 1;
+            }
 			$this->JediUserStatistics->save($statistics);
 		}
 

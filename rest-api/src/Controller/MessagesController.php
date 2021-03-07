@@ -3,13 +3,10 @@
 namespace App\Controller;
 use Cake\Event\EventInterface;
 use Cake\I18n\FrozenTime;
+use Rest\Controller\RestController;
+use Cake\Datasource\ConnectionManager;
 
-class MessagesController extends AppController {
-
-    public function beforeFilter(EventInterface $event)
-    {
-        $this->viewBuilder()->setLayout('main');
-    }
+class MessagesController extends RestController {
 
     public function index()
     {
@@ -211,9 +208,9 @@ class MessagesController extends AppController {
 
     public function search()
     {
-        $this->viewBuilder()->setLayout('ajax');
-        
-        $searched_user = $this->LoadModel('JediUserChars')->find()->where(["username" => $this->request->getData('suchbegriff')])->first();
+        $connection = ConnectionManager::get('default');
+
+        $searched_user = $connection->execute('SELECT CAST(userid AS UNSIGNED) as userid FROM jedi_user_chars WHERE BINARY username = :username', ['username' => $this->request->getData('suchbegriff')])->fetch("assoc");        
         
         if(empty($searched_user))
         {
@@ -221,14 +218,9 @@ class MessagesController extends AppController {
         }
         else
         {
-            $this->set("user",$searched_user);
+            $this->set("userid",$searched_user["userid"]);
         }
     }
-	
-	public function new()
-	{
-		
-	}
 }
 
 ?>

@@ -1,27 +1,41 @@
 import React, { useEffect, useState } from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {GET, setJwtToken} from "../tools/fetch";
-import { Link, Redirect } from 'react-router-dom';
-import { NavLink } from "react-bootstrap";
+import { Redirect } from 'react-router-dom';
+import { Nav, Navbar, NavDropdown, NavLink } from "react-bootstrap";
+import { LinkContainer } from 'react-router-bootstrap';
 
-const Nav = () => {
+import {characterState__setOverviewData} from "../redux/actions/characterActions";
+import { fetchAllianceData } from "../redux/actions/allianceActions";
+
+const Navi = () => {
 
   const dispatch = useDispatch();
 
-  const [rfp, setRfp] = useState();
-  const [rsp, setRsp] = useState();
   const [redirect, setRedirect] = useState(false);
+  const [loading, setLoading] = useState();
 
-  const checkSkillpoints = async (points) => {
-    const response = await GET(`/character/points/${points}`)
-    if(response.points != null) {
-      if(points === "rfp") {
-        setRfp(response.points.rfp)
+  const rspStore2 = useSelector(state => state.skills.skills.rsp);
+  const rfpStore2 = useSelector(state => state.skills.skills.rfp);
+
+  const alliData = useSelector(state => state.alliance);
+
+  const loadData = async() => {
+      try {
+          setLoading(true)
+          const response = await GET('/character/overview')
+          if (response) {
+              dispatch(characterState__setOverviewData(response))  
+          }
+          const responseAlli = await GET('/alliances')
+            if (responseAlli) {
+                dispatch(fetchAllianceData(responseAlli))
+            }
+          setLoading(false)
+      } 
+      catch (e) {
+          return
       }
-      else if (points === "rsp") {
-        setRsp(response.points.rsp)
-      }
-    }
   }
 
   const handleLogout = () => {
@@ -32,8 +46,7 @@ const Nav = () => {
   }
 
   useEffect(() => {
-    checkSkillpoints("rfp");
-    checkSkillpoints("rsp");
+    loadData();
   }, []);
 
   return (
@@ -42,112 +55,109 @@ const Nav = () => {
         <Redirect push to="/login" />
         /*window.location.assign("/login")*/
       }
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark align-items-start">
-        <div className="container-fluid">
-        <Link to="/overview" className="navbar-brand">JTG</Link>
-        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul className="navbar-nav">
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Charakter {rsp > 0 || rfp > 0 ? <span className="text-danger"> !</span> : null}
-          </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <Link to="/overview" className="dropdown-item">
-                    Überblick
-                  </Link>
-                  <Link to="/inventory" className="dropdown-item">
-                    Ausrüstung
-                  </Link>
-                  <Link to="/abilities" className="dropdown-item">
-                    Fähigkeiten {rsp > 0 ? <span className="text-danger"> !</span> : null}
-                  </Link>
-                  <Link to="/forces" className="dropdown-item">
-                    Mächte {rfp > 0 ? <span className="text-danger"> !</span> : null}
-                  </Link>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Stadt
-          </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <Link to="/city" className="dropdown-item">
-                    Überblick
-                  </Link>
-                  <Link to="/apartment" className="dropdown-item">
-                    Apartment
-                  </Link>
-                  <Link to="/bar" className="dropdown-item">
-                    Bar
-                  </Link>
-                  <Link to="/arena" className="dropdown-item">
-                    Arena
-                  </Link>
-                  <Link to="/casino" className="dropdown-item">
-                    Casino
-                  </Link>
-                  <Link to="/layer" className="dropdown-item">
-                    Layer
-                  </Link>
-              </div>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href='#'>Nachrichten</a>
-            </li>
-          <li className="nav-item">
-              <Link to="/alliance" className="nav-link">Allianz</Link>
-            </li>
-          <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Einstellungen
-              </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <Link to="/pref" className="dropdown-item">
-                    Kampf
-                  </Link>
-                <a className="dropdown-item" href="#">Ausbildung</a>
-                <a className="dropdown-item" href="#">Account</a>
-              </div>
-            </li>
-          <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Bugs
-              </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <a className="dropdown-item" href="#">auflisten</a>
-                <a className="dropdown-item" href="#">melden</a>
-              </div>
-            </li>
-          <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Statistiken
-              </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <a className="dropdown-item" href='#'>Spieler-Rangliste</a>
-                <a className="dropdown-item" href="#">Allianz-Rangliste</a>
-                <a className="dropdown-item" href="#">Statistiken</a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Events
-              </a>
-              <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <a className="dropdown-item" href='#'>Ranglisten-Wettkampf</a>
-              </div>
-            </li>
-          <li className="nav-item">
-              <NavLink className="nav-link" onClick={handleLogout}>Logout</NavLink>
-            </li>
-          </ul>
-        </div>
-        </div>
-      </nav>
+      {
+        loading === false &&
+        <Navbar collapseOnSelect bg="dark" variant="dark" expand="lg">
+        
+        <LinkContainer to="/overview">
+          <Navbar.Brand>SWL</Navbar.Brand>
+        </LinkContainer>
+        
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="mr-auto">
+
+            <NavDropdown title={(rfpStore2 > 0 || rspStore2 > 0) ? <span className="text-danger">Charakter !</span> : "Überblick"} id="basic-nav-dropdown">
+              <LinkContainer to="/overview">
+                <NavDropdown.Item>Überblick</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/inventory">
+                <NavDropdown.Item>Ausrüstung</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/abilities">
+                <NavDropdown.Item>{rspStore2 > 0 ? <span>Fähigkeiten <span className="text-danger">{rspStore2}</span></span> : "Fähigkeiten"}</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/forces">
+                <NavDropdown.Item>{rfpStore2 > 0 ? <span>Mächte <span className="text-danger">{rfpStore2}</span></span> : "Mächte"}</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <NavDropdown title="Stadt" id="basic-nav-dropdown">
+              <LinkContainer to="/city">
+                <NavDropdown.Item>Überblick</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/apartment">
+                <NavDropdown.Item>Apartment</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/bar">
+                <NavDropdown.Item>Bar</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/arena">
+                <NavDropdown.Item>Arena</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/casino">
+                <NavDropdown.Item>Casino</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/layer">
+                <NavDropdown.Item>Layer</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <LinkContainer to="/messages">
+              <Nav.Link>Nachrichten</Nav.Link>
+            </LinkContainer>
+
+            <LinkContainer to="/alliance">
+              <Nav.Link>{alliData && alliData.AlliData.alli_fight ? <span className="text-danger">Allianz<img style={{width:"20px",height:"20px"}} src={require("../images/raid.png")} /></span> : "Allianz"}</Nav.Link>
+            </LinkContainer>
+
+            <NavDropdown title="Einstellungen" id="basic-nav-dropdown">
+              <LinkContainer to="/pref">
+                <NavDropdown.Item>Kampf</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="#">
+                <NavDropdown.Item>Ausbildung</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="#">
+                <NavDropdown.Item>Account</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <NavDropdown title="Bugs" id="basic-nav-dropdown">
+              <LinkContainer to="#">
+                <NavDropdown.Item>auflisten</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="#">
+                <NavDropdown.Item>melden</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <NavDropdown title="Statistiken" id="basic-nav-dropdown">
+              <LinkContainer to="/statistics/players">
+                <NavDropdown.Item>Spieler-Rangliste</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="#">
+                <NavDropdown.Item>Allianz-Rangliste</NavDropdown.Item>
+              </LinkContainer>
+              <LinkContainer to="/statistics">
+                <NavDropdown.Item>persönliche Statistik</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <NavDropdown title="Events" id="basic-nav-dropdown">
+              <LinkContainer to="/events/rank">
+                <NavDropdown.Item>Ranglisten-Wettkampf</NavDropdown.Item>
+              </LinkContainer>
+            </NavDropdown>
+
+            <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
+      }
     </div>
 );
 }
 
-export default Nav;
+export default Navi;

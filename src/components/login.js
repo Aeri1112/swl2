@@ -8,6 +8,8 @@ import Dat from "./home/datenschutz";
 import Con from "./home/contact";
 import About from "./home/more";
 
+import "./login.css";
+
 // ich hab hier n bissl was veraendert, aber nix tragisches.
 
 export default function Login() {
@@ -86,7 +88,18 @@ const handleDat = (state) => {
         </Col>
       </Row>
       <Row className="justify-content-end mr-0 ml-0">
-        <Col md="5" className="align-items-center justify-content-center d-flex pl-0 pr-0">
+        <Col className="order-last order-lg-first glassLogin">
+          <div className="m-4 h2">
+            latest Updates
+          </div>
+          <div className="update border">
+            Erweiterung der Server-Statistik <br/>
+            Ranglisten-Wettkampf auf Grundlage der Elo-Punkteverteilung<br/>
+            untätige Charaktere können Raids hinzugefügt werden
+            <footer class="blockquote-footer text-white">06.03.2021</footer>
+          </div>
+        </Col>
+        <Col md="5" className="align-items-center justify-content-center d-flex pl-0 pr-0 order-first order-lg-last">
           <div className="login-box">
             <h1>Welcome!</h1>
             <form onSubmit={handleSubmit}>

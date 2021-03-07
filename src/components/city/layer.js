@@ -19,6 +19,9 @@ const Layer = (props) => {
     const [open, setOpen] = useState(false);
     const [redirect, setRedirect] = useState();
 
+    //indicator for fighting
+    const [fighting, setFighting] = useState(false);
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -79,8 +82,18 @@ const Layer = (props) => {
     }
 
     const handleReport = async () => {
+        setFighting(true);
         const response = await GET("/city/layer/fight")
-        setReport(response.fight_report);
+        if(response.fight_report) {
+            setReport(response.fight_report);
+        }
+        else if(response.doing === "yes") {
+            const report = await GET("/city/layer/view");
+            if(report.fight_report) {
+                setReport(report.fight_report);
+            }
+        }
+        setFighting(false);
     }
 
     const handleAttack = async (a,b) => {
@@ -163,7 +176,7 @@ const Layer = (props) => {
             {
                 loading === false && !report && response.doing === "yes" ?
                 <Countdown
-                    onFinish={<div className="text-center"><Button className="text-dark" variant="link" onClick={handleReport}>Bericht</Button></div>}
+                    onFinish={<div className="text-center"><Button disabled={fighting} className="text-dark" variant="link" onClick={handleReport}>{fighting ? "lade..." : "Bericht"}</Button></div>}
                     timeTillDate={response.char.targettime}
                     timeFormat="X"
                 />

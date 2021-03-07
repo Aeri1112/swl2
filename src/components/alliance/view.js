@@ -59,7 +59,6 @@ const View = () => {
 
     return ( 
         <div>
-            {console.log(selectedOption)}
             {
                 loading === false &&
                 <div>
@@ -82,7 +81,9 @@ const View = () => {
                                         {
                                             +response.char.alliance === response.alliance.id ?
                                             <div>
-                                                <Button onClick={() => {handleUserClick(); setUserId(element.userid)}} className="text-dark" variant="link">{element.username}</Button>
+                                                <Button onClick={() => {handleUserClick(); setUserId(element.userid)}} className="text-dark" variant="link">
+                                                    {element.username} {element.online ? <img style={{width:"10px", height:"10px"}} src={require(`../../images/gruen.png`)} /> : <img style={{width:"10px", height:"10px"}} src={require(`../../images/rot.png`)} />}
+                                                </Button>
                                             </div>
                                             : 
                                             <div>

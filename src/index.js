@@ -10,7 +10,8 @@ import {setBaseUrl} from "./tools/fetch";
 
 window.store = store;
 
-setBaseUrl('https://react.starwarslegends.de/rest-api')
+setBaseUrl('http://localhost/qyr/rest-api')
+//setBaseUrl('https://react.starwarslegends.de/rest-api')
 
 ReactDOM.render(
   <React.StrictMode>
