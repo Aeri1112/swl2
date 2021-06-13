@@ -34,6 +34,7 @@ class altFightComponent extends Component
 	{
         $char = $this->JediUserChars->get($id);
         $char->skills = $this->JediUserSkills->get($id);
+        $abisFinal = new \stdClass();
         
   		//$dbconn->query("SELECT * FROM test_abis WHERE user_id = '$id' LIMIT 1");
   		//$feld = mysql_fetch_array($dbconn->result);
@@ -79,40 +80,40 @@ class altFightComponent extends Component
 		#$abis['dLsd'] = getAbi("dLsd", $id);
 		
 		// Finalle Werte
-		$this->cns = $abis['bCns'];/* + $abis['sCns'] +
+		$abisFinal->cns = $abis['bCns'];/* + $abis['sCns'] +
 					(($abis['bCns'] > 0) ? $abis['rCns'] : 0) +
 					(($abis['bCns'] > 0) ? $abis['dCns'] : 0); */
-		$this->agi = $abis['bAgi']; /* + $abis['sAgi'] +
+		$abisFinal->agi = $abis['bAgi']; /* + $abis['sAgi'] +
 					(($abis['bAgi'] > 0) ? $abis['rAgi'] : 0) +
 					(($abis['bAgi'] > 0) ? $abis['dAgi'] : 0); */
-		$this->spi = $abis['bSpi']; /* + $abis['sSpi'] +
+		$abisFinal->spi = $abis['bSpi']; /* + $abis['sSpi'] +
 					(($abis['bSpi'] > 0) ? $abis['rSpi'] : 0) +
 					(($abis['bSpi'] > 0) ? $abis['dSpi'] : 0); */
-		$this->itl = $abis['bInt']; /* + $abis['sInt'] +
+		$abisFinal->itl = $abis['bInt']; /* + $abis['sInt'] +
 					(($abis['bInt'] > 0) ? $abis['rInt'] : 0) +
 					(($abis['bInt'] > 0) ? $abis['dInt'] : 0); */
-		$this->tac = $abis['bTac']; /* + $abis['sTac'] +
+		$abisFinal->tac = $abis['bTac']; /* + $abis['sTac'] +
 					(($abis['bTac'] > 0) ? $abis['rTac'] : 0) +
 					(($abis['bTac'] > 0) ? $abis['dTac'] : 0); */
-		$this->dex = $abis['bDex']; /* + $abis['sDex'] +
+		$abisFinal->dex = $abis['bDex']; /* + $abis['sDex'] +
 					(($abis['bDex'] > 0) ? $abis['rDex'] : 0) +
 					(($abis['bDex'] > 0) ? $abis['dDex'] : 0); */
-		$this->lsa = $abis['bLsa']; /* + $abis['sLsa'] +
+		$abisFinal->lsa = $abis['bLsa']; /* + $abis['sLsa'] +
 					(($abis['bLsa'] > 0) ? $abis['rLsa'] : 0) +
 					(($abis['bLsa'] > 0) ? $abis['dLsa'] : 0); */
-		$this->lsd = $abis['bLsd']; /* + $abis['sLsd'] +
+		$abisFinal->lsd = $abis['bLsd']; /* + $abis['sLsd'] +
 					(($abis['bLsd'] > 0) ? $abis['rLsd'] : 0) +
 					(($abis['bLsd'] > 0) ? $abis['dLsd'] : 0);	*/
-		if ($this->cns < 1) $this->cns = 1;
-		if ($this->agi < 1) $this->agi = 1;
-		if ($this->spi < 1) $this->spi = 1;
-		if ($this->itl < 1) $this->itl = 1;
-		if ($this->tac < 1) $this->tac = 1;
-		if ($this->dex < 1) $this->dex = 1;
-		if ($this->lsa < 1) $this->lsa = 1;
-		if ($this->lsd < 1) $this->lsd = 1;
+		if ($abisFinal->cns < 1) $abisFinal->cns = 1;
+		if ($abisFinal->agi < 1) $abisFinal->agi = 1;
+		if ($abisFinal->spi < 1) $abisFinal->spi = 1;
+		if ($abisFinal->itl < 1) $abisFinal->itl = 1;
+		if ($abisFinal->tac < 1) $abisFinal->tac = 1;
+		if ($abisFinal->dex < 1) $abisFinal->dex = 1;
+		if ($abisFinal->lsa < 1) $abisFinal->lsa = 1;
+		if ($abisFinal->lsd < 1) $abisFinal->lsd = 1;
        
-        return $abis;
+        return $abisFinal;
     }  
 
 
@@ -120,6 +121,7 @@ class altFightComponent extends Component
 	{
         $char = $this->JediUserChars->get($id);
         $char->skills = $this->JediUserSkills->get($id);
+        $forces = new \stdClass();
 			
 			//$dbconn->query("SELECT * FROM test_mights WHERE user_id = '$id' LIMIT 1");
 			//$feld = mysql_fetch_array($dbconn->result);
@@ -129,7 +131,7 @@ class altFightComponent extends Component
 			#$force['sSpee'] = getForce("sSpee", $id);
 			#$force['rSpee'] = getForce("rSpee", $id);
 			#$force['dSpee'] = getForce("dSpee", $id); 
-			$this->fspee = $force['bSpee']; /* +
+			$forces->fspee = $force['bSpee']; /* +
 						(($force['bSpee'] > 0) ? $force['sSpee'] : 0) +
 						(($force['bSpee'] > 0) ? $force['rSpee'] : 0) +
 						(($force['bSpee'] > 0) ? $force['dSpee'] : 0); */
@@ -138,7 +140,7 @@ class altFightComponent extends Component
 			#$force['sJump'] = getForce("sJump", $id);
 			#$force['rJump'] = getForce("rJump", $id);
 			#$force['dJump'] = getForce("dJump", $id); 
-			$this->fjump = $force['bJump']; /* +
+			$forces->fjump = $force['bJump']; /* +
 						(($force['bJump'] > 0) ? $force['sJump'] : 0) +
 						(($force['bJump'] > 0) ? $force['rJump'] : 0) +
 						(($force['bJump'] > 0) ? $force['dJump'] : 0); */
@@ -147,7 +149,7 @@ class altFightComponent extends Component
 			#$force['sPull'] = getForce("sPull", $id);
 			#$force['rPull'] = getForce("rPull", $id);
 			#$force['dPull'] = getForce("dPull", $id); 
-			$this->fpull = $force['bPull']; /* +
+			$forces->fpull = $force['bPull']; /* +
 						(($force['bPull'] > 0) ? $force['sPull'] : 0) +
 						(($force['bPull'] > 0) ? $force['rPull'] : 0) +
 						(($force['bPull'] > 0) ? $force['dPull'] : 0); */
@@ -156,7 +158,7 @@ class altFightComponent extends Component
 			#$force['sPush'] = getForce("sPush", $id);
 			#$force['rPush'] = getForce("rPush", $id);
 			#$force['dPush'] = getForce("dPush", $id); 
-			$this->fpush = $force['bPush']; /* +
+			$forces->fpush = $force['bPush']; /* +
 						(($force['bPush'] > 0) ? $force['sPush'] : 0) +
 						(($force['bPush'] > 0) ? $force['rPush'] : 0) +
 						(($force['bPush'] > 0) ? $force['dPush'] : 0); */
@@ -165,7 +167,7 @@ class altFightComponent extends Component
 			#$force['sSeei'] = getForce("sSeei", $id);
 			#$force['rSeei'] = getForce("rSeei", $id);
 			#$force['dSeei'] = getForce("Seeid", $id); 
-			$this->fseei = $force['bSeei']; /* +
+			$forces->fseei = $force['bSeei']; /* +
 						(($force['bSeei'] > 0) ? $force['sSeei'] : 0) +
 						(($force['bSeei'] > 0) ? $force['rSeei'] : 0) +
 						(($force['bSeei'] > 0) ? $force['dSeei'] : 0); */
@@ -174,7 +176,7 @@ class altFightComponent extends Component
 			#$force['sSabe'] = getForce("sSabe", $id);
 			#$force['rSabe'] = getForce("rSabe", $id);
 			#$force['dSabe'] = getForce("dSabe", $id); 
-			$this->fsabe = $force['bSabe']; /* +
+			$forces->fsabe = $force['bSabe']; /* +
 						(($force['bSabe'] > 0) ? $force['sSabe'] : 0) +
 						(($force['bSabe'] > 0) ? $force['rSabe'] : 0) +
 						(($force['bSabe'] > 0) ? $force['dSabe'] : 0); */
@@ -185,7 +187,7 @@ class altFightComponent extends Component
 			#$force['sPers'] = getForce("sPers", $id);
 			#$force['rPers'] = getForce("rPers", $id);
 			#$force['dPers'] = getForce("dPers", $id); 
-			$this->fpers = $force['bPers']; /* +
+			$forces->fpers = $force['bPers']; /* +
 						(($force['bPers'] > 0) ? $force['sPers'] : 0) +
 						(($force['bPers'] > 0) ? $force['rPers'] : 0) +
 						(($force['bPers'] > 0) ? $force['dPers'] : 0); */
@@ -194,7 +196,7 @@ class altFightComponent extends Component
 			#$force['sProj'] = getForce("sProj", $id);
 			#$force['rProj'] = getForce("rProj", $id);
 			#$force['dProj'] = getForce("dProj", $id); 
-			$this->fproj = $force['bProj']; /* +
+			$forces->fproj = $force['bProj']; /* +
 						(($force['bProj'] > 0) ? $force['sProj'] : 0) +
 						(($force['bProj'] > 0) ? $force['rProj'] : 0) +
 						(($force['bProj'] > 0) ? $force['dProj'] : 0); */
@@ -203,7 +205,7 @@ class altFightComponent extends Component
 			#$force['sBlin'] = getForce("sBlin", $id);
 			#$force['rBlin'] = getForce("rBlin", $id);
 			#$force['dBlin'] = getForce("dBlin", $id); 
-			$this->fblin = $force['bBlin']; /* +
+			$forces->fblin = $force['bBlin']; /* +
 						(($force['bBlin'] > 0) ? $force['sBlin'] : 0) +
 						(($force['bBlin'] > 0) ? $force['rBlin'] : 0) +
 						(($force['bBlin'] > 0) ? $force['dBlin'] : 0);	*/		
@@ -212,7 +214,7 @@ class altFightComponent extends Component
 			#$force['sConf'] = getForce("sConf", $id);
 			#$force['rConf'] = getForce("rConf", $id);
 			#$force['dConf'] = getForce("dConf", $id); 
-			$this->fconf = $force['bConf']; /* +
+			$forces->fconf = $force['bConf']; /* +
 						(($force['bConf'] > 0) ? $force['sConf'] : 0) +
 						(($force['bConf'] > 0) ? $force['rConf'] : 0) +
 						(($force['bConf'] > 0) ? $force['dConf'] : 0); */			
@@ -221,7 +223,7 @@ class altFightComponent extends Component
 			#$force['sHeal'] = getForce("sHeal", $id);
 			#$force['rHeal'] = getForce("rHeal", $id);
 			#$force['dHeal'] = getForce("dHeal", $id); 
-			$this->fheal = $force['bHeal']; /* +
+			$forces->fheal = $force['bHeal']; /* +
 						(($force['bHeal'] > 0) ? $force['sHeal'] : 0) +
 						(($force['bHeal'] > 0) ? $force['rHeal'] : 0) +
 						(($force['bHeal'] > 0) ? $force['dHeal'] : 0);		*/				
@@ -230,7 +232,7 @@ class altFightComponent extends Component
 			#$force['sTeam'] = getForce("sTeam", $id);
 			#$force['rTeam'] = getForce("rTeam", $id);
 			#$force['dTeam'] = getForce("dTeam", $id); 
-			$this->fteam = $force['bTeam']; /* +
+			$forces->fteam = $force['bTeam']; /* +
 						(($force['bTeam'] > 0) ? $force['sTeam'] : 0) +
 						(($force['bTeam'] > 0) ? $force['rTeam'] : 0) +
 						(($force['bTeam'] > 0) ? $force['dTeam'] : 0); */
@@ -239,7 +241,7 @@ class altFightComponent extends Component
 			#$force['sProt'] = getForce("sProt", $id);
 			#$force['rProt'] = getForce("rProt", $id);
 			#$force['dProt'] = getForce("dProt", $id); 
-			$this->fprot = $force['bProt']; /* +
+			$forces->fprot = $force['bProt']; /* +
 						(($force['bProt'] > 0) ? $force['sProt'] : 0) +
 						(($force['bProt'] > 0) ? $force['rProt'] : 0) +
 						(($force['bProt'] > 0) ? $force['dProt'] : 0); */
@@ -248,7 +250,7 @@ class altFightComponent extends Component
 			#$force['sAbso'] = getForce("sAbso", $id);
 			#$force['rAbso'] = getForce("rAbso", $id);
 			#$force['dAbso'] = getForce("dAbso", $id); 
-			$this->fabso = $force['bAbso']; /* +
+			$forces->fabso = $force['bAbso']; /* +
 						(($force['bAbso'] > 0) ? $force['sAbso'] : 0) +
 						(($force['bAbso'] > 0) ? $force['rAbso'] : 0) +
 						(($force['bAbso'] > 0) ? $force['dAbso'] : 0); */
@@ -259,7 +261,7 @@ class altFightComponent extends Component
 			#$force['sThro'] = getForce("sThro", $id);
 			#$force['rThro'] = getForce("rThro", $id);
 			#$force['dThro'] = getForce("dThro", $id); 
-			$this->fthro = $force['bThro']; /* +
+			$forces->fthro = $force['bThro']; /* +
 						(($force['bThro'] > 0) ? $force['sThro'] : 0) +
 						(($force['bThro'] > 0) ? $force['rThro'] : 0) +
 						(($force['bThro'] > 0) ? $force['dThro'] : 0); */
@@ -268,7 +270,7 @@ class altFightComponent extends Component
 			#$force['sRage'] = getForce("sRage", $id);
 			#$force['rRage'] = getForce("rRage", $id);
 			#$force['dRage'] = getForce("dRage", $id); 
-			$this->frage = $force['bRage']; /* +
+			$forces->frage = $force['bRage']; /* +
 						(($force['bRage'] > 0) ? $force['sRage'] : 0) +
 						(($force['bRage'] > 0) ? $force['rRage'] : 0) +
 						(($force['bRage'] > 0) ? $force['dRage'] : 0); */
@@ -277,7 +279,7 @@ class altFightComponent extends Component
 			#$force['sGrip'] = getForce("sGrip", $id);
 			#$force['rGrip'] = getForce("rGrip", $id);
 			#$force['dGrip'] = getForce("dGrip", $id); 
-			$this->fgrip = $force['bGrip']; /* +
+			$forces->fgrip = $force['bGrip']; /* +
 						(($force['bGrip'] > 0) ? $force['sGrip'] : 0) +
 						(($force['bGrip'] > 0) ? $force['rGrip'] : 0) +
 						(($force['bGrip'] > 0) ? $force['dGrip'] : 0); */
@@ -286,7 +288,7 @@ class altFightComponent extends Component
 			#$force['sDrai'] = getForce("sDrai", $id);
 			#$force['rDrai'] = getForce("rDrai", $id);
 			#$force['dDrai'] = getForce("dDrai", $id); 
-			$this->fdrai = $force['bDrai']; /* +
+			$forces->fdrai = $force['bDrai']; /* +
 						(($force['bDrai'] > 0) ? $force['sDrai'] : 0) +
 						(($force['bDrai'] > 0) ? $force['rDrai'] : 0) +
 						(($force['bDrai'] > 0) ? $force['dDrai'] : 0); */
@@ -295,7 +297,7 @@ class altFightComponent extends Component
 			#$force['sThun'] = getForce("sThun", $id);
 			#$force['rThun'] = getForce("rThun", $id);
 			#$force['dThun'] = getForce("dThun", $id); 
-			$this->fthun = $force['bThun']; /* +
+			$forces->fthun = $force['bThun']; /* +
 						(($force['bThun'] > 0) ? $force['sThun'] : 0) +
 						(($force['bThun'] > 0) ? $force['rThun'] : 0) +
 						(($force['bThun'] > 0) ? $force['dThun'] : 0); */
@@ -304,7 +306,7 @@ class altFightComponent extends Component
 			#$force['sChai'] = getForce("sChai", $id);
 			#$force['rChai'] = getForce("rChai", $id);
 			#$force['dChai'] = getForce("dChai", $id); 
-			$this->fchai = $force['bChai']; /* +
+			$forces->fchai = $force['bChai']; /* +
 						(($force['bChai'] > 0) ? $force['sChai'] : 0) +
 						(($force['bChai'] > 0) ? $force['rChai'] : 0) +
 						(($force['bChai'] > 0) ? $force['dChai'] : 0); */
@@ -313,7 +315,7 @@ class altFightComponent extends Component
 			#$force['sDest'] = getForce("sDest", $id);
 			#$force['rDest'] = getForce("rDest", $id);
 			#$force['dDest'] = getForce("dDest", $id); 
-			$this->fdest = $force['bDest']; /* +
+			$forces->fdest = $force['bDest']; /* +
 						(($force['bDest'] > 0) ? $force['sDest'] : 0) +
 						(($force['bDest'] > 0) ? $force['rDest'] : 0) +
 						(($force['bDest'] > 0) ? $force['dDest'] : 0); */
@@ -323,7 +325,7 @@ class altFightComponent extends Component
 			#$force['sDead'] = getForce("sDead", $id);
 			#$force['rDead'] = getForce("rDead", $id);
 			#$force['dDead'] = getForce("dDead", $id); 
-			$this->fdead = $force['bDead']; /* +
+			$forces->fdead = $force['bDead']; /* +
 						(($force['bDead'] > 0) ? $force['sDead'] : 0) +
 						(($force['bDead'] > 0) ? $force['rDead'] : 0) +
 						(($force['bDead'] > 0) ? $force['dDead'] : 0);	*/	
@@ -334,7 +336,7 @@ class altFightComponent extends Component
 			#$force['sRvtl'] = getForce("sRvtl", $id);
 			#$force['rRvtl'] = getForce("rRvtl", $id);
 			#$force['dRvtl'] = getForce("dRvtl", $id); 
-			$this->frvtl = $force['bRvtl']; /* +
+			$forces->frvtl = $force['bRvtl']; /* +
 						(($force['bRvtl'] > 0) ? $force['sRvtl'] : 0) +
 						(($force['bRvtl'] > 0) ? $force['rRvtl'] : 0) +
 						(($force['bRvtl'] > 0) ? $force['dRvtl'] : 0);	*/		
@@ -343,10 +345,12 @@ class altFightComponent extends Component
 			#$force['sTnrg'] = getForce("sTnrg", $id);
 			#$force['rTnrg'] = getForce("rTnrg", $id);
 			#$force['dTnrg'] = getForce("dTnrg", $id); 
-			$this->ftnrg = $force['bTnrg']; /* +
+			$forces->ftnrg = $force['bTnrg']; /* +
 						(($force['bTnrg'] > 0) ? $force['sTnrg'] : 0) +
 						(($force['bTnrg'] > 0) ? $force['rTnrg'] : 0) +
 						(($force['bTnrg'] > 0) ? $force['dTnrg'] : 0); */
+
+            return $forces;
 		}				
     
     function User ($id)
@@ -374,8 +378,8 @@ class altFightComponent extends Component
 		else
 			$user->wmax = $waffe->maxdmg;
 						
-		$user->abis = $this->Abis($id);	// Abis auslesen und speichern
-		$user->mights = $this->Mights($id); // Mights auslesen und speichern
+		$user->Abis = $this->Abis($id);	// Abis auslesen und speichern
+		$user->Mights = $this->Mights($id); // Mights auslesen und speichern
 		$user->health = $user->health;
 		$user->mana = $user->mana;
 		#$this->bxp = getStat("xp", $id);
@@ -388,11 +392,11 @@ class altFightComponent extends Component
     {
         $this->team = array();  // Team in array aufgeteilt
         $this->team[0] = array(); // Charaktere in team
-        $this->rteam[0]['dschnitt'] = null;  // 0 Abi Klasse erstellt -> schnitt aller Chars/Team
-        $this->rteam[0]['summe'] = null; // 0 Abi Klasse erstellt -> summe aller Chars/Team
+        $this->rteam[0]['dschnitt'] = 0;  // 0 Abi Klasse erstellt -> schnitt aller Chars/Team
+        $this->rteam[0]['summe'] = 0; // 0 Abi Klasse erstellt -> summe aller Chars/Team
         $this->team[1] = array(); // charaktere in team 2
-        $this->rteam[1]['dschnitt'] = null; // 0 Abi Klasse erstellt -> schnitt aller Chars/Team
-        $this->rteam[1]['summe'] = null;   // 0 Abi Klasse erstellt -> summe aller Chars/Team
+        $this->rteam[1]['dschnitt'] = 0; // 0 Abi Klasse erstellt -> schnitt aller Chars/Team
+        $this->rteam[1]['summe'] = 0;   // 0 Abi Klasse erstellt -> summe aller Chars/Team
     }
     
     // Mitglied einem Team zuordnen
@@ -470,7 +474,7 @@ class altFightComponent extends Component
         $alive = 0;
         for ($i=0; $i<count($this->team[$team]); $i++)
         {
-            #if(!is_a($this->team[$team][$i], "User")) continue;
+            if(!is($this->team[$team][$i], "active")) continue;
             if ($this->team[$team][$i]->health <= 0) continue;
             $alive++;
         }
@@ -482,7 +486,7 @@ class altFightComponent extends Component
         $new = array();
         for ($i=0; $i<count($this->team[$team]); $i++)
         {
-            if(!is_a($this->team[$team][$i], "User")) continue;
+            if(!is($this->team[$team][$i], "active")) continue;
             if ($this->team[$team][$i]->health <= 0) continue;
             array_push($new, $i);
         }
@@ -517,7 +521,7 @@ class altFightComponent extends Component
         for ($i=0; $i<count($this->team[0]); $i++)  // team 1 durchgehen
         {
             if ($this->team[0][$i]->health <= 0) continue;
-            #if (!is_a($this->team[0][$i], "User")) continue;
+            if (!is($this->team[0][$i], "active")) continue;
             array_push($this->aktion['id'], $i);
             array_push($this->aktion['team'], 0);
             array_push($this->aktion['wert'], $this->getAktionen(0, $i));   
@@ -531,7 +535,7 @@ class altFightComponent extends Component
         for ($i=0; $i<count($this->team[1]); $i++)  // team 2 druchgehen
         {
             if ($this->team[1][$i]->health <= 0) continue;
-            #if (!is_a($this->team[1][$i], "User")) continue;
+            if (!is($this->team[1][$i], "active")) continue;
             array_push($this->aktion['id'], $i);
             array_push($this->aktion['team'], 1);
             array_push($this->aktion['wert'], $this->getAktionen(1, $i)); 
@@ -612,7 +616,7 @@ class altFightComponent extends Component
     
     function retAbi($id, $id2, $abi)
     {
-        return $this->team[$id][$id2]->$abi;
+        return $this->team[$id][$id2]->Abis->$abi;
     }
     
     function retForce($id, $id2, $force)
@@ -701,7 +705,6 @@ class altFightComponent extends Component
     function getMacht($id, $id2)
     {
         $macht = array();
-        debug($this->team[0]);
         foreach($this->team[$id][$id2]->Mights as $key => $value) 
         {
             #if ($key == "dbconn") continue;
@@ -901,7 +904,7 @@ class altFightComponent extends Component
         $count = 0;
         for ($i=0; $i<count($this->team[$id]); $i++)
         {
-            if (!is_a($this->team[$id][$i], "User")) $count++;
+            if (!is($this->team[$id][$i], "active")) $count++;
         }
         return $count;
     }
@@ -923,7 +926,7 @@ class altFightComponent extends Component
         echo "<font color=orange>==______________________________________==<br>";
         for ($i=0; $i<count($this->team[$id]); $i++)
         {
-            if (!is_a($this->team[$id][$i], "User")) 
+            if (!is($this->team[$id][$i], "active")) 
                 echo $this->team[$id][$i]." -> ".get_class($this->team[$id][$i])."<br>";
             else
                 echo $this->team[$id][$i]->nick." -> ".get_class($this->team[$id][$i])."<br>";	
@@ -1452,7 +1455,7 @@ class altFightComponent extends Component
                                             for ($i=0; $i<count($this->team[$tid2]); $i++)
                                             {
                                                 if ($this->team[$tid][$aid]->mana < $manaVerbrauch) break;
-                                                elseif (!is_a($this->team[$tid2][$i], "User")) 
+                                                elseif (!is($this->team[$tid2][$i], "active")) 
                                                 {
                                                     array_pop($this->team[$tid2]);
                                                     $fightLog .= sprintf(getFor("chai2p","m"), $manaVerbrauch);
@@ -1572,7 +1575,7 @@ class altFightComponent extends Component
                                             for ($i=0; $i<count($this->team[$tid2]); $i++)
                                             {
                                                 if ($this->team[$tid][$aid]->mana < $manaVerbrauch) break;
-                                                elseif (!is_a($this->team[$tid2][$i], "User")) 
+                                                elseif (!is($this->team[$tid2][$i], "active")) 
                                                 {
                                                     array_pop($this->team[$tid2]);
                                                     $fightLog .= sprintf(getFor("dead2p","m"), $manaVerbrauch);
@@ -1818,11 +1821,13 @@ class altFightComponent extends Component
         {
             for ($i=0; $i<count($this->team[$a]); $i++)
             {
-                if(!is_a($this->team[$a][$i], "User")) continue;
+                if(!is($this->team[$a][$i], "active")) continue;
+                #if(!is_a($this->team[$a][$i], "User")) continue;
                 array_push($resthp, $this->team[$a][$i]->health);
                 array_push($restlvl, $this->team[$a][$i]->level);
             }
         }
+        
         $maxlvl = max($restlvl);
         $minlvl = min($restlvl);
         $maxhp  = max($resthp);
@@ -1833,7 +1838,7 @@ class altFightComponent extends Component
             $lvlschnitt += $restlvl[$i];
         }
         $lvlschnitt /= count($restlvl);
-        $basiclvl = ($maxlvl + lvlschnitt) / 1.6;
+        $basiclvl = ($maxlvl + $lvlschnitt) / 1.6;
         $winxp = round(($basiclvl)/(10-count($restlvl)),0) + rand(18,25);
         $losexp = round($winxp/8 + rand(18,25)/2.3,0);
         // ende xp berechnung
@@ -1850,7 +1855,7 @@ class altFightComponent extends Component
         $saveW = $this->team[0][0]->nick." (".$this->team[0][0]->level.")";
         for ($i=1; $i<count($this->team[0]); $i++)
         {
-            if(is_a($this->team[0][$i], "User"))
+            if(is($this->team[0][$i], "active"))
             {
                 $temp .= ", ".$this->team[0][$i]->nick;
                 $saveW .= ", ".$this->team[0][$i]->nick." (".$this->team[0][$i]->level.")";
@@ -1860,7 +1865,7 @@ class altFightComponent extends Component
         $temp .= " won the fight.<br>";
         for ($i=0; $i<count($this->team[0]); $i++)
         {	
-            if(is_a($this->team[0][$i], "User"))
+            if(is($this->team[0][$i], "active"))
             {
                 $xpgot = $winxp + $this->team[0][$i]->level;
                 $pxp = ceil($xpgot * ($this->team[0][$i]->bpxp/100));
@@ -1884,7 +1889,7 @@ class altFightComponent extends Component
         $saveL = $this->team[0][0]->nick." (".$this->team[0][0]->level.")";
         for ($i=1; $i<count($this->team[0]); $i++)
         {
-            if(is_a($this->team[0][$i], "User"))
+            if(is($this->team[0][$i], "active"))
             {
                 $temp .= ", ".$this->team[0][$i]->nick;
                 $saveL .= ", ".$this->team[0][$i]->nick." (".$this->team[0][$i]->level.")";
@@ -1893,7 +1898,7 @@ class altFightComponent extends Component
         $temp .= " lost the fight.<br>";
         for ($i=0; $i<count($this->team[0]); $i++)
         {
-            if(is_a($this->team[0][$i], "User"))
+            if(is($this->team[0][$i], "active"))
             {
                 $xpgot = $losexp + $this->team[0][$i]->level;	
                 $pxp = ceil($xpgot * ($this->team[0][$i]->bpxp/100));
@@ -1918,7 +1923,7 @@ class altFightComponent extends Component
         $saveW = $this->team[1][0]->nick." (".$this->team[1][0]->level.")";
         for ($i=1; $i<count($this->team[1]); $i++)
         {
-            if(is_a($this->team[1][$i], "User"))
+            if(is($this->team[1][$i], "active"))
             {
                 $temp2 .= ", ".$this->team[1][$i]->nick;
                 $saveW .= ", ".$this->team[1][$i]->nick." (".$this->team[1][$i]->level.")";
@@ -1928,7 +1933,7 @@ class altFightComponent extends Component
         $temp2 .= " won the fight.<br>";
         for ($i=0; $i<count($this->team[1]); $i++)
         {
-            if(is_a($this->team[1][$i], "User"))
+            if(is($this->team[1][$i], "active"))
             {
                 $xpgot = $winxp + $this->team[1][$i]->level;
                 $pxp = ceil($xpgot * ($this->team[1][$i]->bpxp/100));
@@ -1952,7 +1957,7 @@ class altFightComponent extends Component
         $saveL = $this->team[1][0]->nick." (".$this->team[1][0]->level.")";
         for ($i=1; $i<count($this->team[1]); $i++)
         {
-            if(is_a($this->team[1][$i], "User"))
+            if(is($this->team[1][$i], "active"))
             {
                 $temp2 .= ", ".$this->team[1][$i]->nick;
                 $saveL .= ", ".$this->team[1][$i]->nick." (".$this->team[1][$i]->level.")";
@@ -1961,7 +1966,7 @@ class altFightComponent extends Component
         $temp2 .= " lost the fight.<br>";
         for ($i=0; $i<count($this->team[1]); $i++)
         {
-            if(is_a($this->team[1][$i], "User"))
+            if(is($this->team[1][$i], "active"))
             {
                 $xpgot = $losexp + $this->team[1][$i]->level;
                 $pxp = ceil($xpgot * ($this->team[1][$i]->bpxp/100));
@@ -1991,7 +1996,7 @@ class altFightComponent extends Component
         
         $fightLog .= $temp.$temp2;
         $this->fightLog = $this->headerAusgabe($this->team[0], $this->team[1]).$fightLog;
-        echo $fightLog;
+        echo $this->fightLog;
         //
         // Ende Ergebnisausgabe
         //
@@ -2001,7 +2006,7 @@ class altFightComponent extends Component
             for ($i=0; $i<count($this->team[$a]); $i++)
             {
                 if ($this->use_mana)
-                    if(is_a($this->team[$a][$i], "User")) {
+                    if(is($this->team[$a][$i], "active")) {
                         if (!is_subclass_of($this->team[$a][$i], "User"))
                             setStat("akmana", $this->team[$a][$i]->id, $this->team[$a][$i]->mana);
                 }		
@@ -2015,14 +2020,14 @@ class altFightComponent extends Component
         $header .= $t1[0]->nick." (".$t1[0]->level.")";
         for ($i=1; $i<count($t1); $i++)
         {
-            if(!is_a($t1[$i], "User")) continue;
+            if(!is($t1[$i], "active")) continue;
             $header .= ", ".$t1[$i]->nick." (".$t1[$i]->level.")";
         }
         $header .= " vs. ";
         $header .= $t2[0]->nick." (".$t2[0]->level.")";
         for ($i=1; $i<count($t2); $i++)
         {
-            if(!is_a($t2[$i], "User")) continue;
+            if(!is($t2[$i], "active")) continue;
             $header .= ", ".$t2[$i]->nick." (".$t2[$i]->level.")";
         }	
         $header .= "<br><br>";
@@ -2283,4 +2288,12 @@ function getFor($var, $sex)
 	$f['rvtli'] = "<span class='of'>%s tried to cast Force Revitalize, but got interrupted by %s. (%s)</span><br>";
 	$f['rvtlm'] = "<span class='of'>%s tried to cast Force Revitalize, but had not enough mana. (%s)</span><br>";
 	return $f[$var];
+}
+function is($obj, $type) {
+    if($obj->status == "active" || $obj->status == "NPC") {
+        return true;
+    }
+    else {
+        return false;
+    }
 }

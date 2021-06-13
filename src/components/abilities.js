@@ -6,6 +6,7 @@ import { characterState__setOverviewData } from "../redux/actions/characterActio
 import Abi from "./ability";
 
 import Row from "react-bootstrap/Row";
+import CheckQuest from "./quest/checkQuest";
 
 const Abis = () => {
 
@@ -14,6 +15,8 @@ const Abis = () => {
     const [loading, setLoading] = useState();
     const [loadTrainAbi, setLoadTrainAbi] = useState(false);
     const [skillable, setSkillable] = useState(false);
+
+    const quest = useSelector(state => state.skills.skills.quest);
 
     const loadAbi = async () => {
         setLoading(true);
@@ -55,7 +58,16 @@ const Abis = () => {
     return (
         <>
         {
-            loading === false ?
+            loading === false && quest[0] === 1 &&
+            <div>
+                <CheckQuest
+                    details={quest[1]}
+                    refresh={loadAbi}
+                />
+            </div>
+        }
+        {
+            loading === false && (quest === 0 || (quest[1].quest_id === "1" && (quest[1].step_id === "6" || quest[1].step_id === "7"))) ?
                 <Row>
                     <Abi 
                         abi="cns" 

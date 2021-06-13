@@ -113,7 +113,7 @@ const Raid = () => {
                                 {
                                     AlliData.AlliData.raid_members.map((element) => {
                                         return (
-                                            <div className='col-sm-3 pb-1 pr-1' style={{minHeight:"100px",marginLeft:"10px",borderRadius:"20px",backgroundColor:"gainsboro"}}>
+                                            <div className='col-sm-3 pb-1 pr-1 pt-1' style={{minHeight:"100px",marginLeft:"10px",borderRadius:"20px",backgroundColor:"gainsboro"}}>
                                                 <div className="progress progress-bar-vertical" >
                                                     <div className="progress-bar progress-bar-striped bg-danger" role="progressbar" style={{height: element.HealthPro+"%"}} aria-valuenow={element.HealthPro} aria-valuemin="0" aria-valuemax="100">
                                                     </div>
@@ -235,7 +235,7 @@ const Raid = () => {
                 <Alliance_menu alliId={AlliData.AlliData.alliance.id}/>
             }
             {
-                loading === true &&
+                (loading === true || loadingChar === true) &&
                 "loading..."
             }
         </div> 

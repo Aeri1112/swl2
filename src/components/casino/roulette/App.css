@@ -1,0 +1,163 @@
+  .app {
+    /* width: 100%; */
+    /* margin: 0px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5vh;
+    height: auto;
+  }
+  
+  .wheel-history {
+    display: flex;
+    width: 63vw;
+    background-color: rgba(167, 121, 51, 0.6);
+    border-radius: 14pt;
+    padding-left: 0.5vw;
+    margin-left: .3vw;
+    font-family: 'Condiment', cursive;
+    font-size: 1.7vw;
+    align-items: center;
+    font-weight: bold;
+    color: rgb(8, 8, 8);
+  }
+  
+  .history-num {
+    margin: 0px 5px;
+    color: rgb(238, 238, 238);
+  }
+  
+  .green-previous-number {
+    background-color: rgba(89, 161, 34, 0.9);
+    width: 2.45vw;
+    height: 2.45vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Libre Baskerville', serif;
+    border-radius: 10pt;
+    padding: .2vh;
+    font-size: 1.6vw;
+    margin-bottom: 1.2vh;
+    margin-left: .1vw;
+  }
+  
+  .red-previous-number {
+    background-color: rgba(254, 0, 0, 0.9);
+    width: 2.45vw;
+    height: 2.45vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Libre Baskerville', serif;
+    border-radius: 10pt;
+    padding: .2vh;
+    font-size: 1.6vw;
+    margin-bottom: 1.2vh;
+    margin-left: .1vw;
+  }
+  
+  .black-previous-number {
+    background-color: rgba(22, 22, 22, 0.9);
+    width: 2.45vw;
+    height: 2.45vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Libre Baskerville', serif;
+    border-radius: 10pt;
+    padding: .2vh;
+    font-size: 1.6vw;
+    margin-bottom: 1.2vh;
+    margin-left: .1vw;
+  }
+  
+  .header-h3 {
+    margin: .4vw;
+  }
+  
+  .header-div {
+    display: flex;
+    align-items: flex-start;
+    width: 13vw;
+    /* height: 10vh; */
+    height: 100%;
+    background: linear-gradient(0.25turn, rgb(167,120,51), rgba(167, 121, 51, 0.6));
+    text-shadow: rgb(167,120,51) 2px 2px 1px;
+    border-radius: 14pt;
+    padding-left: 0.5vw;
+    margin-left: .3vw;
+    font-family: 'Condiment', cursive;
+    font-size: 2.5vw;
+    color: rgb(12, 12, 12);
+  }
+  
+  .right-header {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    position: relative;
+    background: linear-gradient(0.75turn, rgb(167,120,51), rgba(167, 121, 51, 0.6));
+    margin-right: .3vw;
+    width: 21vw;
+  }
+  
+  .wood-railing {
+    width: 98.4vw;
+    height: 58vh;
+    /* padding-top: 5vh; */
+    background-image: url(https://data.1freewallpapers.com/download/polished-wood-texture.jpg);
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5vh;
+    border: rgb(78, 9, 1) 4px solid; 
+    border-radius: 14pt;
+    /* justify-self: center; */
+    /* align-self: center; */
+  }
+  
+  .chip-count-text {
+    color: rgb(238, 238, 238);
+    text-shadow: rgb(167,120,51) 2.5px 1px 3px;
+    font-size: 2.5vw;
+    /* font-family: 'Libre Baskerville', serif; */
+    margin-bottom: .9vh;
+  }
+  
+  .previous-numbers-div {
+    display: flex;
+  }
+  
+  
+  .chip-count-pending-bet {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: .2vw;
+  }
+  
+  .pending-bet-span {
+    font-size: 1.2vw;
+    color: rgb(238, 238, 238);
+    align-self: flex-end;
+    margin-right: 3vw;
+    position: absolute;
+    right: 2vw;
+    bottom: 0vmin;
+  }
+  
+  .empty-pending-bet-span {
+    font-size: 1vw;
+    color: rgba(240, 248, 255, 0);
+    /* position: absolute;
+    right: 8vw; */
+  }

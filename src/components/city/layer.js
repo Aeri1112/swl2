@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { useHistory } from "react-router-dom";
 
 import Bars from "../../components/bars";
 import {GET,POST} from "../../tools/fetch";
@@ -7,13 +8,18 @@ import Countdown from "../../tools/countdown";
 import Carousel from 'react-bootstrap/Carousel'
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
+import CheckQuest from "../quest/checkQuest";
 
 const Layer = (props) => {
 
+    const history = useHistory();
+    
     const [loading, setLoading] = useState();
     const [response, setResponse] = useState();
     const [report, setReport] = useState();
     const [carouselElements, setCarouselElements] = useState();
+
+    const [door, setDoor] = useState();
 
     //if you cannot enter the layer
     const [open, setOpen] = useState(false);
@@ -71,6 +77,10 @@ const Layer = (props) => {
                         </Carousel.Item>
                     )
                 }
+            }
+            const openDoor = await GET(`/quest/quest/2`)
+            if(openDoor) {
+                setDoor(openDoor.status)
             }
         } catch (e) {
             console.error(e)
@@ -138,7 +148,21 @@ const Layer = (props) => {
             </Modal>
             }
             {
-                loading === false && !report ?
+                loading === false && response.quest[0] === 1 &&
+                <div>
+                    <CheckQuest
+                        details={response.quest[1]}
+                        refresh={loadData}
+                    />
+                </div>
+            }
+            {
+                loading === false && (response.char.location2 === "l" || response.char.location2 === "r") && response.quest === 0 ?
+                    history.push("/layer2")
+                :   null
+            }
+            {
+                loading === false && !report && door === "done" ?
                     <div>
                         <div className="container-fluid p-0 m-0">
                             <div className="row justify-content-center">
@@ -174,6 +198,13 @@ const Layer = (props) => {
                 : null
             }
             {
+                loading === false && !report && door === "not available yet" &&
+                <div className="text-center">
+                    Auf deinem Weg in den Untergrund gehen dir die alten Geschichten durch den Kopf. Du fühlst dich den drohenden Kämpfen noch nicht gewachsen.{<br/>}
+                    Komme wieder wenn du stärker bist.
+                </div>
+            }
+            {
                 loading === false && !report && response.doing === "yes" ?
                 <Countdown
                     onFinish={<div className="text-center"><Button disabled={fighting} className="text-dark" variant="link" onClick={handleReport}>{fighting ? "lade..." : "Bericht"}</Button></div>}
@@ -183,7 +214,7 @@ const Layer = (props) => {
                 : null
             }
             {
-                loading === false && !report ?
+                loading === false && !report && door === "done" ?
                     <div>
                         <Bars type={"Health"} width={ response.skills.health_width + "%"} data={response.char.health} bg={"bg-danger"}/>
                         <Bars type={"Mana"} width={ response.skills.mana_width + "%"} data={response.char.mana} bg={"bg-primary"}/>

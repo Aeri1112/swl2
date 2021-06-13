@@ -14,6 +14,7 @@ class CityController extends RestController {
         parent::initialize();
         $this->loadComponent('Fight');
 		$this->loadComponent('maxHealth');
+		$this->loadComponent("Quest");
     }
 
     public function layer()
@@ -61,6 +62,19 @@ class CityController extends RestController {
         {
             $this->set("busy",true);
         }
+
+		//set location
+		$char->location = "Layer 2";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
 
 		//casting fseei
 		if($this->request->getData("cast"))
@@ -354,8 +368,11 @@ class CityController extends RestController {
 
 		$skills['max_health'] = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model); 
         $skills['max_mana'] = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
-        $skills['max_engery'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+        $skills['max_energy'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
 		
+		$skills["health_width"] = round($char["health"] * 100 / $skills["max_health"]);
+        $skills["mana_width"] = round($char["mana"] * 100 / $skills["max_mana"]);
+        $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
         //Kein Leben für Layer
         if($char->health <= 10 && $char->actionid != 2)
         {
@@ -382,6 +399,19 @@ class CityController extends RestController {
             $this->Flash->error("You are already fighting somewhere else");
             return $this->redirect(['controller' => 'character', 'action' => 'overview']);
         }
+
+		//set location
+		$char->location = "Layer 2";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
 
 		//casting fseei
 		if($this->request->getData("cast"))
@@ -431,34 +461,29 @@ class CityController extends RestController {
             if($this->request->getParam('pass')[0] == "attack" && $this->request->getData("fight") == "y")
             {
 				$char = $this->loadModel("JediUserChars")->get($this->Auth->User("id")); //nochmal nen neuen user holen wenn attack aufgerufen wurde
-                if($this->request->getData("a") != 3 && $char->actionid == 0 && $char->targetid == 0)
+                if($char->actionid == 0 && $char->targetid == 0)
                 {
                     $fights = $this->loadModel("JediFights");
                     $fights_player = $this->loadModel("JediFightsPlayers");
 
                     //get position
-                    $a = $this->request->getData("a");
-                    $b = $this->request->getData("b");
+                    $a = $this->request->getData("enemy");
+
+					//get enemy
+					if($this->request->getData("enemy") === "l") {
+						$enemyId = 11;
+					}
+					elseif ($this->request->getData("enemy") === "r") {
+						$enemyId = 12;
+					}
 
                     $char->targetid = 2;
                     $char->actionid = 2;
                     $char->location = "Layer 2";
-                    $char->location2 = $a."_".$b;
+                    $char->location2 = $a;
                     $char->targettime = time()+(300);
 
                     $this->JediUserChars->save($char);
-
-                    $monster = explode("_", $char->location2);
-                    if($monster[0] == 2)
-                    {
-                        $attack =  2;
-                        $coopnpc = rand(0,5);
-                    }
-                    elseif($monster[0] == 1)
-                    {
-                        $attack = 2;
-                        $coopnpc = 0; 
-                    }
 
                     $type = "duelnpc";
 
@@ -478,12 +503,10 @@ class CityController extends RestController {
 
 					$fights_player = $this->JediFightsPlayers->newEntity();
 					$fights_player->fightid = $fightId["fightid"];
-					$fights_player->userid = 8;
+					$fights_player->userid = $enemyId;
 					$fights_player->teamid = 1;
 					$fights_player->npc = "y";
 					$this->JediFightsPlayers->save($fights_player);                   
-
-                    $this->redirect(['action' => 'layer2']);
                 }
                 else
                 {
@@ -614,13 +637,25 @@ class CityController extends RestController {
 			return;
         }
 
+		//set location
 		$char->location = "Arena";
 		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
 		
         //Bericht gelesen
         if($this->request->getParam('pass') && $this->request->getParam('pass')[0] == "clear")
         {
             $char->actionid = 0;
+			$char->targetid = 0;
+			$char->targettime = 0;
             $char->lastfightid = 0;
 			$this->JediUserChars->save($char);
 			return;
@@ -927,7 +962,7 @@ class CityController extends RestController {
 
         //Falls noch ein Bericht nicht gelesen wurde
         $char = $this->loadModel("JediUserChars")->get($this->Auth->User("id"));
-        if($char->lastfightid != "0")
+        if($char->lastfightid != "0" && $char->actionid != 2 && $char->targetid != 2)
         {
             $fight_report = $this->JediFightReports->find()->where(['md5' => $char->lastfightid])->first();
             $this->set('fight_report',$fight_report);
@@ -980,9 +1015,7 @@ class CityController extends RestController {
 		}
 		else
 		{
-			$this->Flash->error("You are busy");
 			$this->set("open",false);
-			return;
 		}
 		
 		$this->LoadModel('JediItemsJewelry');
@@ -993,9 +1026,25 @@ class CityController extends RestController {
 
 		$skills['max_health'] = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model); 
         $skills['max_mana'] = $this->maxHealth->calc_maxMana($skills->spi, $skills->itl, $skills->level, $jewelry_model, $weapons_model);
-        $skills['max_engery'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
+        $skills['max_energy'] = $this->maxHealth->calc_maxEnergy($skills->cns, $skills->agi, $skills->level, $jewelry_model, $weapons_model);
 
-        $char->location = "Bar";
+        $skills["health_width"] = round($char["health"] * 100 / $skills["max_health"]);
+        $skills["mana_width"] = round($char["mana"] * 100 / $skills["max_mana"]);
+        $skills["energy_width"] = round($char["energy"] * 100 / $skills["max_energy"]);
+
+        //set location
+		$char->location = "Bar";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
+
 		$this->set("char",$char);
 		$this->set("skills",$skills);
 		
@@ -1009,38 +1058,43 @@ class CityController extends RestController {
             if($this->request->getParam("pass")[1] == "m")
             {
                 //Achtung! fixer preis
-                if($char->cash < 10)
-                {
-                    $this->Flash->error("You have not enough cash");
-                    return $this->redirect(["action" => "bar"]);
-                }
                 $char->cash -= 10;
                 $char->mana += 50;
                 $barman->cash += 10;
 				if($char->mana > $skills['max_mana']) $char->mana = $skills['max_mana'];
             }
 
+			//big
+			elseif ($this->request->getParam("pass")[1] == "Bm") {
+				//differenz ermitteln
+				$diff = $skills['max_mana'] - $char->mana;
+				//mana stücke a 50 ermitteln
+				$pieces = ceil($diff / 50);
+				//preis ermitteln
+				$price = $pieces * 10;
+
+				//Achtung! fixer preis
+                $char->cash -= $price;
+                $char->mana = $skills['max_mana'];
+                $barman->cash += $price;
+				if($char->mana > $skills['max_mana']) $char->mana = $skills['max_mana'];
+			}
+
 			//health
 			elseif($this->request->getParam("pass")[1] == "h")
             {
 				$max_health = $this->maxHealth->calc_maxHp($skills->cns, $skills->level, $jewelry_model, $weapons_model);
-				$char->health += 50;
+				$char->health = $max_health;
 				if($char->health > $max_health) $char->health = $max_health;
             }
 			//Energy
 			elseif($this->request->getParam("pass")[1] == "e")
             {
-				//Achtung! fixer preis
-                if($char->cash < 150)
-                {
-                    $this->Flash->error("You have not enough cash");
-                    return $this->redirect(["action" => "bar"]);
-                }
-				
+				//Achtung! fixer preis				
 				$char->energy += 10;
 				$char->cash -= 150;
 				$barman->cash += 150;
-				if($char->energy > $skills['max_engery']) $char->energy = $skills['max_engery'];
+				if($char->energy > $skills['max_energy']) $char->energy = $skills['max_energy'];
             }
 			
             $this->JediUserChars->save($char);
@@ -1059,7 +1113,7 @@ class CityController extends RestController {
 			$this->set("open",true);
 			$this->set("sleep",false);
 		}
-		elseif($char->actionid == 1)
+		elseif($char->actionid == 3)
 		{
 			$this->set("open",true);
 			$this->set("sleep",true);
@@ -1088,7 +1142,7 @@ class CityController extends RestController {
 			if($duration > 6) $duration = 6;
 			
 			$sleeptime = $duration * 60 * 60;
-			$char->actionid = 1;
+			$char->actionid = 3;
 			$char->targetid = $char->base; //base
 			$char->targettime = time() + $sleeptime;
 			$this->JediUserChars->save($char);
@@ -1099,7 +1153,7 @@ class CityController extends RestController {
 			$this->JediCityApartments->save($apa);
 		}
 		
-		if($char->actionid == 1)
+		if($char->actionid == 3)
 		{
 			$lefttime = $apa->sleepingsince + $apa->sleepingfor - time();
   

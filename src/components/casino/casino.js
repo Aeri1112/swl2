@@ -5,9 +5,16 @@ const Casino = () => {
 
     return (
         <div>
-            <Link to="/bj">
-                Blackjack
-            </Link>
+            <div>
+                <Link to="/bj">
+                    Blackjack
+                </Link>
+            </div>
+            <div>
+                <Link to="/roulette">
+                    Roulette
+                </Link>
+            </div>
         </div>
     );
 }

@@ -13,6 +13,8 @@ class CharacterController extends RestController {
     {
         parent::initialize();
         $this->loadComponent('maxHealth');
+        $this->loadComponent("Quest");
+        $this->loadModel("JediUserChars");
     }
 
     //api fetch user function character/user&id=
@@ -33,6 +35,29 @@ class CharacterController extends RestController {
         
         $this->LoadModel('JediItemsWeapons');
         $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $requestID]); 
+
+        $response["char"] = $char;
+        $response["skills"] = $skills;
+
+        $this->set("user",$response);
+    }
+
+    //api fetch user function character/npc&id=
+    public function npc() {
+
+        $requestID = $this->request->getQuery("id");
+        if(!$this->request->getQuery("id")) {
+            $requestID = $this->Auth->User("id");
+        }
+        $char = $this->loadModel("JediNpcChars")->get($requestID);
+
+        $skills = $this->loadModel("JediNpcSkills")->get($requestID);
+
+        $this->LoadModel('JediItemsJewelryNpc');
+        $jewelry_model = $this->JediItemsJewelryNpc->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $requestID]);
+        
+        $this->LoadModel('JediItemsWeaponsNpc');
+        $weapons_model = $this->JediItemsWeaponsNpc->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $requestID]); 
 
         $response["char"] = $char;
         $response["skills"] = $skills;
@@ -69,6 +94,19 @@ class CharacterController extends RestController {
         
         $this->LoadModel('JediItemsWeapons');
         $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);        
+
+        //set location
+		$char->location = "Overview";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
 
         //Levelup?
         if($skills->xp >= $this->calc_xp_next_lvl($skills->level))
@@ -121,17 +159,28 @@ class CharacterController extends RestController {
 
     public function abilities()
     {
+        $char = $this->JediUserChars->get($this->Auth->User("id"));
+        //set location
+		$char->location = "Abis";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
+
         $this->LoadModel('JediUserSkills');  
         //Hier nur abis abfragen, um über react loopen zu können
         $skills = $this->JediUserSkills->find()->select(["cns","agi","lsa","lsd","dex","tac","spi","itl"])->where(["userid" => $this->Auth->User("id")]);
-
+        
         //dann nochmal die skillpoints abfragen
         $skillPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
         $forcePoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
-        $skills->rfp = $forcePoints;
-        $skills->rsp = $skillPoints;
-        $this->set("rsp",$skillPoints->rsp);
-        $this->set("rfp",$forcePoints->rfp);
+
         $this->set('skills',$skills);
         
         //skillen
@@ -146,6 +195,15 @@ class CharacterController extends RestController {
                 $this->JediUserSkills->save($skills);
             }
         }
+        //dann nochmal die skillpoints abfragen
+        $skillPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
+        $forcePoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
+
+        $skills->rfp = $forcePoints;
+        $skills->rsp = $skillPoints;
+        $this->set("rsp",$skillPoints->rsp);
+        $this->set("rfp",$forcePoints->rfp);
+
         
         $this->LoadModel('JediItemsJewelry');
         $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
@@ -164,18 +222,28 @@ class CharacterController extends RestController {
 
     public function forces()
     {
-        $this->LoadModel('JediUserSkills');  
-        //Hier nur abis abfragen, um über react loopen zu können
-        $skills = $this->JediUserSkills->get(["userid" => $this->Auth->User("id")]);
+        $char = $this->JediUserChars->get($this->Auth->User("id"));
+        //set location
+		$char->location = "Forces";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
 
+        $this->LoadModel('JediUserSkills');  
+
+        $skills = $this->JediUserSkills->get(["userid" => $this->Auth->User("id")]);
+        
         //dann nochmal die skillpoints abfragen
         $skillPoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
         $abiPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
-
-        $this->set("rfp",$skillPoints->rfp);
-        $this->set("rsp",$abiPoints->rsp);
-        $this->set('skills',$skills);
-
+        
         if($skillPoints->rfp > 0)
         {
             if($this->request->is(['post']))
@@ -187,6 +255,15 @@ class CharacterController extends RestController {
                 $this->JediUserSkills->save($skills);
             }
         }
+        //dann nochmal die skillpoints abfragen
+        $skillPoints = $this->JediUserSkills->find()->select(["rfp"])->where(["userid" => $this->Auth->User("id")])->first();
+        $abiPoints = $this->JediUserSkills->find()->select(["rsp"])->where(["userid" => $this->Auth->User("id")])->first();
+
+        $this->set("rfp",$skillPoints->rfp);
+        $this->set("rsp",$abiPoints->rsp);
+
+        $skills = $this->JediUserSkills->get(["userid" => $this->Auth->User("id")]);
+        $this->set('skills',$skills);
         
         $this->LoadModel('JediItemsJewelry');
         $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
@@ -219,6 +296,18 @@ class CharacterController extends RestController {
         $char = $this->JediUserChars->get($this->Auth->User("id"));
         $char->skills = $this->JediUserSkills->get($this->Auth->User("id"));
 
+        //set location
+		$char->location = "Inventar";
+		$this->JediUserChars->save($char);
+		//pruefe auf quest
+		$this->Quest->aktiviere_quest();
+		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
+			$this->set("quest",0);
+		}
+		else {
+			$this->set("quest",$quest_comp);
+		}
         
         if($this->request->getParam('pass') && $char->actionid == 0 && $char->targetid == 0 && $char->targettime == 0)
         {
@@ -507,7 +596,7 @@ class CharacterController extends RestController {
 					'stat5_mod' => 'SUBSTRING_INDEX(`stat5`, ",", 1)', 
 					'stat5_value' => 'CAST(SUBSTRING_INDEX(`stat5`, ",", -1) AS UNSIGNED)',
 					'stat5_stat' => 'SUBSTRING_INDEX(SUBSTRING_INDEX(`stat5`, ",", 2),",",-1)',
-					'name', 'qlvl', 'reql', 'reqs', 
+					'name', 'qlvl', 'reql', 'reqs', 'consumable', 'sizex',
 					'price'
 				]);
                 $this->set("totalItems",$query->count());

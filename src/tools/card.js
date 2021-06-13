@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from 'react-bootstrap/Card'
 
-const StatCard = ({title, all, wins, lose, wprob, loots, lootsprob, rats, giantRat, reek, splitwins, doublewins, splitwins21, doublewins21, wins15, winningstreak, insurancewins, gewinn}) => {
+const StatCard = ({left, right, title, all, wins, lose, wprob, loots, lootsprob, rats, giantRat, reek, splitwins, doublewins, bj, winningstreak, insurancewins, gewinn}) => {
     return ( 
         <Card>
             <Card.Body>
@@ -24,6 +24,14 @@ const StatCard = ({title, all, wins, lose, wprob, loots, lootsprob, rats, giantR
                         <div>{rats}</div>
                     }
                     {
+                        left &&
+                        <div>{left}</div>
+                    }
+                    {
+                        right &&
+                        <div>{right}</div>
+                    }
+                    {
                         giantRat &&
                         <div>{giantRat}</div>
                     }
@@ -34,11 +42,9 @@ const StatCard = ({title, all, wins, lose, wprob, loots, lootsprob, rats, giantR
                     {
                         splitwins &&
                         <div>
+                            <div>{bj}</div>
                             <div>{splitwins}</div>
                             <div>{doublewins}</div>
-                            <div>{splitwins21}</div>
-                            <div>{doublewins21}</div>
-                            <div>{wins15}</div>
                             <div>{winningstreak}</div>
                             <div>{insurancewins}</div>
                             <div>{gewinn}</div>

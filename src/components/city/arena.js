@@ -8,6 +8,7 @@ import Table from 'react-bootstrap/Table'
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Spinner from 'react-bootstrap/Spinner'
+import CheckQuest from '../quest/checkQuest';
 
 const Arena = (props) => {
 
@@ -53,8 +54,7 @@ const Arena = (props) => {
 
     const clearFight = async () => {
         setReport();
-        const clear = GET("/city/arena/clear");
-        clear && loadData();
+        const clear = await GET("/city/arena/clear");
     }
 
     const handleJoin = async (id) => {
@@ -130,7 +130,7 @@ const Arena = (props) => {
                                     fight.status === "preparing" ||
                                     fight.status === "fighting" ?
                                         <Countdown
-                                            onFinish={() => props.history.push(`/arena`)}
+                                            onFinish="finish..."
                                             timeTillDate={fight.opentime + +fight.startin}
                                             timeFormat="X"
                                         />
@@ -206,60 +206,72 @@ const Arena = (props) => {
                 </Modal>
             }
             {
-                loading === false && !report &&
+                loading === false && response.quest[0] === 1 &&
+                <CheckQuest 
+                    details={response.quest[1]}
+                    refresh={loadData}
+                />
+            }
+            {
+                loading === false && !report && (response.quest === 0 || (response.quest[1].quest_id === "1" && response.quest[1].step_id === "3")) &&
                 <div>
-                <Table striped size="sm" responsive="sm">
-                    <caption>running fights</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">
-                                Name
-                            </th>
-                            <th scope="col">
-                                Typ
-                            </th>
-                            <th scope="col">
-                                Wetteinsatz
-                            </th>
-                            <th scope="col">
-                                Status
-                            </th>
-                            <th scope="col">
-                                Aktion
-                            </th>
-                        </tr>
-                    </thead>
-                        <tbody>
-                            {loading === false ?
-                            response.fights ?
-                            tableData(response)
-                            :<tr><td colSpan="5">no fights</td></tr>
-                            : <tr><td colSpan="5">loading...</td></tr>
-                            }
-                        </tbody>
-                </Table>
+                    <Table striped size="sm" responsive="sm">
+                        <caption>running fights</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    Name
+                                </th>
+                                <th scope="col">
+                                    Typ
+                                </th>
+                                <th scope="col">
+                                    Wetteinsatz
+                                </th>
+                                <th scope="col">
+                                    Status
+                                </th>
+                                <th scope="col">
+                                    Aktion
+                                </th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                                {loading === false ?
+                                response.fights ?
+                                tableData(response)
+                                :<tr><td colSpan="5">no fights</td></tr>
+                                : <tr><td colSpan="5">loading...</td></tr>
+                                }
+                            </tbody>
+                    </Table>
                 
-                <div className="text-right">
-                    <Button 
-                        disabled={response.char.actionid !== 0 || response.char.energy <= 1 ? true : false} 
-                        onClick={() => setOpening(true)}
-                    >
-                        Kampf eröffnen
-                    </Button>
-                    {" "}
-                    <Button 
-                        disabled={response.char.actionid === 15 ? false : true} 
-                        onClick={() => handleCancel()}
-                    >
-                        Kampf abbrechen
-                    </Button>
-                </div>
+                    <div className="text-right">
+                        <Button 
+                            disabled={response.char.actionid !== 0 || response.char.energy <= 1 ? true : false} 
+                            onClick={() => setOpening(true)}
+                        >
+                            Kampf eröffnen
+                        </Button>
+                        {" "}
+                        <Button 
+                            disabled={response.char.actionid === 15 ? false : true} 
+                            onClick={() => handleCancel()}
+                        >
+                            Kampf abbrechen
+                        </Button>
+                    </div>
+                    <div className="text-right mt-1">
+                        <Button onClick={loadData}>
+                            refresh
+                        </Button>
+                    </div>
                 
-                <ArenaModal show={opening} onHide={setOpening} response={response}/>
+                    <ArenaModal show={opening} onHide={setOpening} response={response}/>
                 </div>
             }
             {
-                loading === false && report ?
+                loading === false && report && response.quest === 0 ?
                 <div>
                     <div dangerouslySetInnerHTML={{ __html: report }}>
                     </div>
@@ -268,13 +280,13 @@ const Arena = (props) => {
                 : null
             }
             {
-                loading === false && 
+                loading === false && !report && response.quest === 0 &&
                     <div className="small">
                         <div>finished fights</div>
                         {response.fight_reps.map((element) => {
 
                             return (
-                                <div key={element.md5}>{moment(element.zeit,"X").format("DD.MM.YY HH:MM")} - <a rel="noopener noreferrer" target="_blank" href={`https://hosting142616.a2e76.netcup.net/fight/reada/${element.md5}`}>{element.headline}</a></div>
+                                <div key={element.md5}>{moment(element.zeit,"X").format("DD.MM. HH:mm")} - {element.headline}</div>
                             );
                         })}
                     </div>

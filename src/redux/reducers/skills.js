@@ -13,8 +13,8 @@ const initialState = {
     skills: {},
     side: {},
     master: {},
-    inv: {},
-    eqp: {},
+    inv: {quest: 0},
+    eqp: {quest: 0},
     error: null
 }
 

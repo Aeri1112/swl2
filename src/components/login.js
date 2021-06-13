@@ -37,7 +37,6 @@ export default function Login() {
       if(data) {
         setLoading(false)
         dispatch({type:"IS_AUTH",payload:{isAuth:"true",userId:data.user.id, username:data.username.username}});
-        console.log("hier")
         setJwtToken(data.token)
         setData(data)
       }
@@ -93,11 +92,29 @@ const handleDat = (state) => {
             latest Updates
           </div>
           <div className="update border">
+            Eine Möglichkeit gegen stärke, dem Spieler angepasste, NPC's zu käpfen wurde hinzugefügt<br/>
+            weitere kleinere Verbesserungen
+            <footer className="blockquote-footer text-white">25.05.2021</footer>
+          </div>
+          <div className="update border">
+            Die ersten zwei Quests haben es ins Spiel geschafft!<br/>
+            kleinere Verbesserungen
+            <footer className="blockquote-footer text-white">09.04.2021</footer>
+          </div>
+          <div className="update border">
+            Refresh-Button in der Arena<br/>
+            Anzeige der aktuellen Aktion in der Charakter-Übersicht<br/>
+            kleinere Verbesserung (z.B. Countdown)
+            <footer className="blockquote-footer text-white">07.03.2021</footer>
+          </div>
+          {/*
+          <div className="update border">
             Erweiterung der Server-Statistik <br/>
             Ranglisten-Wettkampf auf Grundlage der Elo-Punkteverteilung<br/>
             untätige Charaktere können Raids hinzugefügt werden
-            <footer class="blockquote-footer text-white">06.03.2021</footer>
+            <footer className="blockquote-footer text-white">06.03.2021</footer>
           </div>
+          */}
         </Col>
         <Col md="5" className="align-items-center justify-content-center d-flex pl-0 pr-0 order-first order-lg-last">
           <div className="login-box">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {GET, setJwtToken} from "../tools/fetch";
 import { Redirect } from 'react-router-dom';
-import { Nav, Navbar, NavDropdown, NavLink } from "react-bootstrap";
+import { Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { LinkContainer } from 'react-router-bootstrap';
 
 import {characterState__setOverviewData} from "../redux/actions/characterActions";
@@ -67,7 +67,7 @@ const Navi = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
 
-            <NavDropdown title={(rfpStore2 > 0 || rspStore2 > 0) ? <span className="text-danger">Charakter !</span> : "Überblick"} id="basic-nav-dropdown">
+            <NavDropdown title={(rfpStore2 > 0 || rspStore2 > 0) ? <span className="text-danger">Charakter !</span> : "Charakter"} id="basic-nav-dropdown">
               <LinkContainer to="/overview">
                 <NavDropdown.Item>Überblick</NavDropdown.Item>
               </LinkContainer>
@@ -115,7 +115,7 @@ const Navi = () => {
               <LinkContainer to="/pref">
                 <NavDropdown.Item>Kampf</NavDropdown.Item>
               </LinkContainer>
-              <LinkContainer to="#">
+              <LinkContainer to="/pada">
                 <NavDropdown.Item>Ausbildung</NavDropdown.Item>
               </LinkContainer>
               <LinkContainer to="#">
@@ -149,6 +149,10 @@ const Navi = () => {
                 <NavDropdown.Item>Ranglisten-Wettkampf</NavDropdown.Item>
               </LinkContainer>
             </NavDropdown>
+
+            <LinkContainer to="/quest">
+              <Nav.Link>Quests</Nav.Link>
+            </LinkContainer>
 
             <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
 

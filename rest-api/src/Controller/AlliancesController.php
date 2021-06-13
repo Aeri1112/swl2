@@ -57,7 +57,7 @@ class AlliancesController extends RestController
             $last_reset = $alliance->last_reset->i18nFormat('dd.MM.yyyy','Europe/Berlin', 'de-DE');
             if($now != $last_reset)
             {
-                $alliance->attemps = 5;
+                $alliance->attemps = 3;
                 $alliance->last_reset = $time->i18nFormat('YYYY-MM-dd','Europe/Berlin', 'de-DE');
                 $this->JediAlliances->save($alliance);
             }

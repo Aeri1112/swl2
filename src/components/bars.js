@@ -29,6 +29,10 @@ class Bars extends React.Component {
                 side = `linear-gradient(to right, #dc3545 ${this.props.perc + 40}%, white ${this.props.white}%, #28a745 ${60-this.props.perc}%)`;
                 perc = this.props.perc + "%";
                 break;
+            case "Strength":
+                img = <img src={require(`../images/arm.png`) } alt=""/>;
+                perc = this.props.width;
+                break;
             default:
                 break;
         }

@@ -10,21 +10,40 @@ const Countdown = (props) => {
     const [runOf, setRunOf] = useState(false);
 
     useEffect(() => {
+        const then = moment(props.timeTillDate, props.timeFormat);
+        const now = moment();
+        const countdown = moment.duration(then.diff(now));
+        setDays(countdown.get("days"));
+        setHours(countdown.get("hours"));
+        const min = countdown.get("minutes") < 10 ? "0" + countdown.get("minutes") : countdown.get("minutes");
+        setMinutes(countdown.get("minutes"));
+        const sec = countdown.get("seconds") < 10 ? "0" + countdown.get("seconds") : countdown.get("seconds");
+        setSeconds(countdown.get("seconds"));
+        if(now > then) {
+            setRunOf(true)
+            document.title="finish";
+        }
+        else {
+            document.title= min + ":" + sec;
+        }
+
         const interval = setInterval(() => {
             const then = moment(props.timeTillDate, props.timeFormat);
             const now = moment();
             const countdown = moment.duration(then.diff(now));
             setDays(countdown.get("days"));
             setHours(countdown.get("hours"));
+            const min = countdown.get("minutes") < 10 ? "0" + countdown.get("minutes") : countdown.get("minutes");
             setMinutes(countdown.get("minutes"));
+            const sec = countdown.get("seconds") < 10 ? "0" + countdown.get("seconds") : countdown.get("seconds");
             setSeconds(countdown.get("seconds"));
 
-            if(now > then) {
-                setRunOf(true)
+            if(now > then) {                   
+                setRunOf(true);
                 document.title="finish";
             }
             else {
-                document.title="" + countdown.get("minutes") + ":" + countdown.get("seconds");
+                document.title= min + ":" + sec;
             }
         }, 1000);
 
@@ -34,6 +53,12 @@ const Countdown = (props) => {
             }
         }
     }, [])
+
+    useEffect(() => {
+        if((props.onFinish instanceof Function) === true && runOf === true) {
+            props.onFinish()
+        }
+    },[runOf])
 
     return (
         <div>
@@ -57,7 +82,8 @@ const Countdown = (props) => {
                         <div className="text-center"><span>{seconds} seconds</span></div>
                     }
                 </div>
-            : props.onFinish
+            : (props.onFinish instanceof Function) === false &&
+                    props.onFinish
             }
         </div>
     );

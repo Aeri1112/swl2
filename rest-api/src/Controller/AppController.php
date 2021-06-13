@@ -71,18 +71,6 @@ class AppController extends Controller
          * see https://book.cakephp.org/3/en/controllers/components/security.html
          */
         //$this->loadComponent('Security');
-
-        $online_offline_status = 0;
-		
-		if($this->Auth->User())
-		{
-			$this->loadModel("Accounts");
-			
-			//SET last activity
-			$last_activity = date('Y-m-d H:i:s', time());
-			$user = $this->Accounts->get($this->Auth->User("id"));
-			$user->last_activity = $last_activity;
-			$this->Accounts->save($user);
-		}
+        
     }
 }

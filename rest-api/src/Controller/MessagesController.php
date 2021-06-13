@@ -210,7 +210,7 @@ class MessagesController extends RestController {
     {
         $connection = ConnectionManager::get('default');
 
-        $searched_user = $connection->execute('SELECT CAST(userid AS UNSIGNED) as userid FROM jedi_user_chars WHERE BINARY username = :username', ['username' => $this->request->getData('suchbegriff')])->fetch("assoc");        
+        $searched_user = $connection->execute('SELECT CAST(userid AS UNSIGNED) as userid FROM jedi_user_chars WHERE BINARY username = :username AND status = "active"', ['username' => $this->request->getData('suchbegriff')])->fetch("assoc");        
         
         if(empty($searched_user))
         {

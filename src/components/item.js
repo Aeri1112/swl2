@@ -31,7 +31,7 @@ const Item = (props) => {
                 <Card.Body className="text-center">
                     
                     {
-                        !props.type ? <Card.Title>
+                        !props.type || props.type === "box" ? <Card.Title>
                             {props.item.name}
                         </Card.Title> : null
                     }
@@ -69,7 +69,7 @@ const Item = (props) => {
                     </Card.Text>
                 </Card.Body>
 
-                {props.type !== "cash" ? 
+                {props.type !== "cash" && props.type !== "box" ? 
                 <Card.Footer>
                     <small>
                     <Button className="text-muted" size="sm" variant="link" onClick={postDataHandler}>ablegen</Button>

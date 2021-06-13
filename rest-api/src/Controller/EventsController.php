@@ -24,6 +24,7 @@ class EventsController extends RestController {
 		$this->loadModel("JediUserStatistics");
 		$this->loadModel("JediItemsJewelry");
 		$this->loadModel("JediItemsWeapons");
+        $this->loadModel("JediItemsMisc");
     }
 
     public $paginate = [
@@ -185,9 +186,29 @@ class EventsController extends RestController {
 	
 	public function item()
 	{
-		$i = $this->request->getQuery('i');
-		$item = $this->Treasure->loot("ranc4", 20, "raid", "price", $i);
-		$this->set("loot",$item);
+        //Habe ich überhaupt eine Box?
+        $query = $this->JediItemsMisc->find()->where(["sizex" => 1]);
+        $itemCount = $query->count();
+		$lootItem = $this->request->getData("item");
+
+        //Wenn ich eine oder mehrerer Boxen habe
+        if($itemCount >= 1) {
+            $item = $this->Treasure->loot($lootItem, $this->Auth->User("id"), "box", "box", 99);
+            $item->stat1 = explode(",", $item->stat1);
+            $item->stat1 = implode(" ", $item->stat1);
+            $item->stat2 = explode(",", $item->stat2);
+            $item->stat2 = implode(" ", $item->stat2);
+            $item->stat3 = explode(",", $item->stat3);
+            $item->stat3 = implode(" ", $item->stat3);
+            $item->stat4 = explode(",", $item->stat4);
+            $item->stat4 = implode(" ", $item->stat4);
+            $item->stat5 = explode(",", $item->stat5);
+            $item->stat5 = implode(" ", $item->stat5);
+		    $this->set("loot",$item);
+
+            //Box löschen
+            $this->JediItemsMisc->delete($this->JediItemsMisc->get($this->request->getData("boxId")));
+        }	
 	}
 	
 	function price($eventid, $price_type)

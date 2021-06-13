@@ -1,0 +1,233 @@
+.betting-options-div {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    width: 100%;
+}
+
+.chip-options-div {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    width: 60vw;
+    height: 25vh;
+}
+
+.chip-img {
+    height: 10vh;
+    cursor: pointer;
+}
+
+.chip-img:hover {
+    border: 4px gold solid;
+    border-radius: 60px;
+}
+
+.active-chip {
+    border: gold 10px solid;
+    cursor: pointer;
+    height: 10vh;
+    border-radius: 60pt;
+}
+
+.spin-circle {
+    height: 17vh;
+    cursor: pointer;
+    /* margin-top: 10px;
+    margin-bottom: 10px; */
+    /* padding-top: 10px;
+    padding-bottom: 10px; */
+}
+
+.spin-circle:hover {
+    border: 8px gold solid;
+    border-radius: 60pt;
+}
+
+.spin-circle:active {
+    border: 4px gold solid;
+    border-radius: 60pt;   
+}
+
+.spin-circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 19.5vh;
+    width: 19.5vh;
+}
+
+.spin-text {
+    color: rgb(238, 238, 238);
+    font-family: 'Condiment', cursive;
+    font-size: 4vmin;
+    position: absolute;
+    margin: 0px;
+    text-shadow: 2px 2px 2px rgb(167,120,51);
+    cursor: pointer;
+}
+
+.img-div {
+    height: 13vmin;
+    width: 13vmin;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spin-img-div {
+    height: 100%;
+    width: 20vmin;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-self: flex-start;
+}
+
+.buttons-div {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 4.5vmin;
+}
+
+.filler-div {
+    width: 100%;
+    height: 4vmin;
+}
+
+.wheel-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.roulette-wheel {
+    height: 25vh;
+}
+.roulette-wheel-spinning {
+    height: 25vh;
+    animation-name: spin;
+    animation-duration: 500ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.wheel-number-div {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 14.5vh;
+    width: 14.5vh;
+    border-radius: 100pt;
+    cursor: default;
+}
+
+.winning-number-h2 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    color: rgb(240, 240, 240);
+    font-size: 9vmin;
+    border-radius: 60pt;
+    /* padding: 1vw; */
+    font-family: 'Libre Baskerville', serif;
+    font-weight: 900;
+    /* width: 5%;
+    height: 10%; */
+    text-align: center;
+}
+
+.green-wheel-number {
+    background-color: rgba(89, 161, 34, 0.9);
+}
+
+.red-wheel-number {
+    background-color: rgba(254, 0, 0, 0.9);
+
+}
+
+.black-wheel-number {
+    background-color: rgba(22, 22, 22, 0.9);
+}
+
+.winnings-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(167,120,51, 0.85);
+    z-index: 101;
+    border-radius: 6pt;
+    padding: 3vh;
+    padding-top:  0vh;
+    padding-bottom: 0vh;
+    width: 100%;
+    height: 18vmin;
+    font-family: 'Condiment', cursive;
+}
+  
+.winnings-div > h3 {
+    font-size: 5.5vmin;
+    color: rgb(8, 8, 8);
+    text-shadow: rgb(167,120,51) 2px 2px 1px;
+    text-align: center;
+    margin-bottom: 0vh;
+    margin-top: 0vh;
+}
+
+.restart-button, 
+.collect-winnings-button, 
+.reset-button, 
+.undo-bet-button {
+    padding: 1vh;
+    margin-top: 1vh;
+    border-radius: 4pt;
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.7vw;
+}
+
+.restart-button:focus, 
+.collect-winnings-button:focus,
+.reset-button:focus, 
+.undo-bet-button:focus {
+    outline: none;
+}
+
+.restart-button:active, 
+.collect-winnings-button:active,
+.reset-button:active, 
+.undo-bet-button:active {
+    background-color: rgb(170, 170, 170);
+    border: 1px solid rgb(167,120,51);
+}
+
+.reset-button-div {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    width: auto;
+    min-width: 35vw;
+    max-width: 65vw;
+}  
+
+.winnings-div-num {
+    color: rgb(238, 238, 238);
+    margin-left: 1vw;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+

@@ -18,6 +18,7 @@ class QuestComponent extends Component
         $this->QuestBedingungen = TableRegistry::get('QuestBedingungen');	
 		$this->JediUserSkills = TableRegistry::get("JediUserSkills");
 		$this->JediUserChars = TableRegistry::get("JediUserChars");
+		$this->JediItemsJewelry = TableRegistry::get("JediItemsJewelry");
 		$this->connection = ConnectionManager::get('default');
     }
 	
@@ -32,7 +33,7 @@ class QuestComponent extends Component
 			//Wenn noch gar nichts in der DB
 			if($user_quest == null)
 			{
-				$user_quest = $this->UserQuests->newEmptyEntity();
+				$user_quest = $this->UserQuests->newEntity();
 				$user_quest->quest_id = $quest->quest_id;
 				$user_quest->user_id = $_SESSION["Auth"]["User"]["id"];
 				$user_quest->status = 0;
@@ -43,7 +44,7 @@ class QuestComponent extends Component
 				
 				for ($i=1; $i < $quest_steps+1; $i++)
 				{ 
-					$steps = $this->UserQuestSteps->newEmptyEntity();
+					$steps = $this->UserQuestSteps->newEntity();
 					$steps->user_id = $_SESSION["Auth"]["User"]["id"];
 					$steps->quest_id = $quest->quest_id;
 					$steps->step_id = $i;
@@ -57,7 +58,7 @@ class QuestComponent extends Component
 			{
 				$user_quest->status = 1;
 				//Und den ersten Step auf 1 setzen
-				$steps = $this->UserQuestSteps->newEmptyEntity();
+				$steps = $this->UserQuestSteps->newEntity();
 				$steps->user_id = $_SESSION["Auth"]["User"]["id"];
 				$steps->quest_id = $quest->quest_id;
 				$steps->step_id = 1;
@@ -74,9 +75,9 @@ class QuestComponent extends Component
 		# out: 1 (Questseite wurde ausgegeben)
 		#      0 (kein Quest verfuegbar, kein HTML-Output)
 		#
-		if ( $this->quest_fortsetzen($user_id,/*$hausnummer,*/$haustyp) )
+		if ( $details = $this->quest_fortsetzen($user_id,/*$hausnummer,*/$haustyp) )
 		{
-			return 1;
+			return [1, $details];
 		}
 		if ( $this->starte_naechsten_quest($user_id,/*$hausnummer, */$haustyp) )
 		{
@@ -191,15 +192,10 @@ class QuestComponent extends Component
 			{			
 				//Erledigt Bedingung der einzelen Steps durchgehen
 				//Bei typ == simple kann direkt die erledigt_bedingung abgefragt werden und der Queststep beendet werden
-				if($this->check_bedingung_quest_step($quest['quest_id'], $quest['step_id'], $user_id) && $quest['typ'] == "simple")
+				if($quest['typ'] == "simple")
 				{
-					$this->endQuestStep($user_id, $quest['quest_id'], $quest['step_id']);
-					
-					if($quest['hidden'] == '0')
-					{
-						echo $quest['erfolgstext'];
-					}
-					return 1;
+	
+					return $quest;
 				}
 				/* Bei allen anderen quest_step typen muss erledigt_bedingung erfüllt sein, damit 1 returned wird und die questseite ausgegeben wird
 				 * dort drin steckt dann die eigentliche Prüfung (nach wait/fight/choose/text kann quest_step auf 3 gesetzt werden)
@@ -275,17 +271,15 @@ class QuestComponent extends Component
 						}
 					}
 					*/
-					return 1;	
+					return $quest;	
 					
 				}
 				elseif($quest['typ'] == "fight")
 				{
-					if($report == false)
-					{
-						echo $quest['einleitungstext']."<br>";						
-					}
-					
-					return 1;
+					return $quest;
+				}
+				elseif($quest["typ"] == "puzzle") {
+					return $quest;
 				}
 				else
 				{
@@ -389,7 +383,27 @@ class QuestComponent extends Component
 		
 		$erledigtbedingung = $this->translate_func($bedingung["funktion"], $userid);
 
-		if($erledigtbedingung >= $parameter)
+		if($bedingung["funktion"] == "abis" OR $bedingung["funktion"] == "mights") {
+			//hier ist erledigtbedingung ein array aus den abis oder forces
+			foreach ($erledigtbedingung as $key => $value) {
+				if($value >= $parameter) {
+					return true;
+				}
+			}
+			return false;
+		}
+		elseif($bedingung["funktion"] == "location") {
+			if($erledigtbedingung == $parameter) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		elseif($bedingung["funktion"] == "win") {
+			return false;
+		}
+		elseif($erledigtbedingung >= $parameter)
 		{
 			return true;
 		}
@@ -409,15 +423,16 @@ class QuestComponent extends Component
 				return $char->skills->level;
 				break;
 			case 'location':
-				if($char->location == "Bar")
-				{
-					return 1;
-				}
-				else
-				{
-					return 0;
-				}
+				return $char->location;
 				break;
+			case 'abis':
+				return [$char->skills->cns, $char->skills->agi, $char->skills->spi, $char->skills->itl, $char->skills->dex, $char->skills->tac, $char->skills->lsa, $char->skills->lsd];
+			case 'mights':
+				return [$char->skills->fspee, $char->skills->fjump, $char->skills->fpull, $char->skills->fpush, $char->skills->fseei, 
+						$char->skills->fpers, $char->skills->fproj, $char->skills->fblin, $char->skills->fconf, $char->skills->fheal, $char->skills->fabso, $char->skills->fprot,
+						$char->skills->frage, $char->skills->fthro, $char->skills->fdrai, $char->skills->fgrip, $char->skills->fthun, $char->skills->fdest, $char->skills->fdead];
+			case 'health':
+				return $char->health;
 			default:
 				return "NaN";
 				break;
@@ -435,8 +450,55 @@ class QuestComponent extends Component
 				$this->JediUserChars->save($char);
 				return;
 				break;
-			case 'location':
-				return $char->location;
+			case 'incxp':
+				$char->skills->xp += $parameter;
+				$this->JediUserSkills->save($char->skills);
+				return;
+			case 'incSp':
+				$char->skills->rsp += 1;
+				$this->JediUserSkills->save($char->skills);
+				return;
+			case 'incFp':
+				$char->skills->rfp += 1;
+				$this->JediUserSkills->save($char->skills);
+				return;
+			case 'starterBundle':
+				$jewelry = $this->JediItemsJewelry->newEntity();
+				$jewelry->ownerid = $userid;
+				$jewelry->position = "inv";
+				$jewelry->name = "Kampfhilfe";
+				$jewelry->img = "gold1";
+				$jewelry->sizex = 16;
+				$jewelry->sizey = 16;
+				$jewelry->price = 100;
+				$jewelry->qlvl = 10;
+				$jewelry->crafted = 0;
+				$jewelry->weight = 10;
+				$jewelry->reql = 2;
+				$jewelry->reqs = 0;
+				$jewelry->mindmg = 0;
+				$jewelry->maxdmg = 0;
+				$jewelry->stat1 = "inc,lsa,2";
+				$this->JediItemsJewelry->save($jewelry);
+				//NUmmer 2
+				$jewelry = $this->JediItemsJewelry->newEntity();
+				$jewelry->ownerid = $userid;
+				$jewelry->position = "inv";
+				$jewelry->name = "Machthilfe";
+				$jewelry->img = "gold1";
+				$jewelry->sizex = 16;
+				$jewelry->sizey = 16;
+				$jewelry->price = 100;
+				$jewelry->qlvl = 10;
+				$jewelry->crafted = 0;
+				$jewelry->weight = 10;
+				$jewelry->reql = 2;
+				$jewelry->reqs = 0;
+				$jewelry->mindmg = 0;
+				$jewelry->maxdmg = 0;
+				$jewelry->stat1 = "inc,spi,2";
+				$this->JediItemsJewelry->save($jewelry);
+				return;
 			default:
 				return "NaN";
 				break;

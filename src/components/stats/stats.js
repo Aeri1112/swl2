@@ -46,6 +46,8 @@ const Stats = () => {
                         loots={"Loots: " + data.loots}
                         lootsprob={"Lootqoute: " + Math.round((data.loots * 100 / (data.npcwins)) * 100) / 100 + " %"}
                         rats={"killed Rats: " + data.killedRat}
+                        left={"killed left Person: " + data.killedLeft}
+                        right={"killed right Person: " + data.killedRight}
                     />
                     <StatCard 
                         title="Raids"
@@ -71,6 +73,7 @@ const Stats = () => {
                         wins={"wins: " + data.bjtotalwins}
                         lose={"lose: " + (data.bjhands - data.bjtotalwins)}
                         wprob={"Siegqoute: " + Math.round((data.bjtotalwins * 100 / ((data.bjhands - data.bjtotalwins) + data.bjtotalwins)) * 100) / 100 + " %"}
+                        bj={"Blackjacks: " + data.bj21}
                         splitwins={"Splitwins: " + data.bjsplitwins}
                         doublewins={"Doublewins: " + data.bjdoublewins}
                         winningstreak={"longest winning streak: " + data.bjwinningstreak}

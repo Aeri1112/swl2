@@ -58,28 +58,28 @@ class StatisticsController extends RestController {
         $type = $this->request->getQuery('type');
 
         if($type == "level") {
-            $list = $this->JediUserSkills->find("all", ["contain" => ["JediUserChars"]])->select(["userid", $type,'JediUserChars.username'])->order([$type => "desc"]);
+            $list = $this->JediUserSkills->find("all", ["contain" => ["JediUserChars"]])->select(["userid", $type,'JediUserChars.username'])->where(["JediUserChars.status" => "active"])->order([$type => "desc"]);
         }
         else if ($type == "arenawins") {
-            $list = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "arenawins", "arenalosts", "JediUserChars.username"])->order(["arenawins" => "desc"]);
+            $list = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "arenawins", "arenalosts", "JediUserChars.username"])->where(["JediUserChars.status" => "active"])->order(["arenawins" => "desc"]);
         }
         else {
-            $list = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", $type, "JediUserChars.username"])->order([$type => "desc"]);
+            $list = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", $type, "JediUserChars.username"])->where(["JediUserChars.status" => "active"])->order([$type => "desc"]);
         }
         $this->set("list",$this->paginate($list));
 
         $users = $this->set("players",$this->loadModel("JediUserChars")->find()->where(["status" => "active"])->count());
 
-        $rats = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "killedRat", "JediUserChars.username"])->order(["killedRat" => "desc"])->limit(3);
+        $rats = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "killedRat", "JediUserChars.username"])->where(["JediUserChars.status" => "active"])->order(["killedRat" => "desc"])->limit(3);
         $this->set("rats",$rats);
 
-        $loots = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "loots", "JediUserChars.username"])->order(["loots" => "desc"])->limit(3);
+        $loots = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "loots", "JediUserChars.username"])->where(["JediUserChars.status" => "active"])->order(["loots" => "desc"])->limit(3);
         $this->set("loots",$loots);
 
-        $arena = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "arenawins", "arenalosts", "JediUserChars.username"])->order(["arenawins" => "desc"])->limit(3);
+        $arena = $this->JediUserStatistics->find("all", ["contain" => ["JediUserChars"]])->select(["JediUserStatistics.userid", "arenawins", "arenalosts", "JediUserChars.username"])->where(["JediUserChars.status" => "active"])->order(["arenawins" => "desc"])->limit(3);
         $this->set("arena",$arena);
 
-        $level = $this->JediUserSkills->find("all", ["contain" => ["JediUserChars"]])->select(["userid", "level",'JediUserChars.username'])->order(["level" => "desc"])->limit(3);
+        $level = $this->JediUserSkills->find("all", ["contain" => ["JediUserChars"]])->select(["userid", "level",'JediUserChars.username'])->where(["JediUserChars.status" => "active"])->order(["level" => "desc"])->limit(3);
         $this->set("level",$level);
     }
 }

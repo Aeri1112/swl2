@@ -144,7 +144,7 @@ const Elo = () => {
                                     {
                                         data.fight_reps_a.map((rep) => {
                                             return (
-                                                <div key={rep.md5}>{moment(rep.zeit).format("DD.MM HH:mm") + " Uhr " + rep.headline}</div>
+                                                <div key={rep.md5}>{moment(rep.zeit,"X").format("DD.MM. HH:mm") + " Uhr " + rep.headline}</div>
                                             );
                                         })
                                     }
@@ -156,7 +156,7 @@ const Elo = () => {
                                     {
                                         data.fight_reps_d.map((rep) => {
                                             return (
-                                                <div key={rep.md5}>{moment(rep.zeit).format("DD.MM HH:mm") + " Uhr " + rep.headline}</div>
+                                                <div key={rep.md5}>{moment(rep.zeit,"X").format("DD.MM. HH:mm") + " Uhr " + rep.headline}</div>
                                             );
                                         })
                                     }

@@ -65,7 +65,7 @@ const Chat = () => {
         </ReactScrollableFeed>
       </div>
       <div className="message-box">
-        <textarea type="text" className="message-input" id="message" onChange={handleTextChange} value={text} placeholder="Type message..."></textarea>
+        <textarea style={{width:"90%"}} type="text" className="message-input" id="message" onChange={handleTextChange} value={text} placeholder="Type message..."></textarea>
         <input type="hidden" id="username" name="username" value={username}></input>
         <button type="submit" onClick={onAddMessage} className="message-submit">Send</button>
       </div>

@@ -15,8 +15,8 @@ const Abi = (props) => {
         return (
             <>
                 { 
-                    text.map(content => content.id === props.abi ? (
-                        <Col sm="6">
+                    text.map((content,index) => content.id === props.abi ? (
+                        <Col sm="6" key={index}>
                             <ul className="list-unstyled">
                                 <li className="media"> 
                                     <img className="align-self-center mr-3" src={require(`../images/${props.abi}.gif`) } alt="" />

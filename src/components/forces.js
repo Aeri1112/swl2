@@ -5,6 +5,7 @@ import { characterState__setOverviewData } from "../redux/actions/characterActio
 import Force from "./force";
 
 import Row from "react-bootstrap/Row";
+import CheckQuest from "./quest/checkQuest";
 
 const Forces = () => {
 
@@ -14,6 +15,8 @@ const Forces = () => {
     const [loadTrainForce, setLoadTrainForce] = useState(false);
     const [skillable, setSkillable] = useState(false);
     let range;
+
+    const quest = useSelector(state => state.skills.skills.quest);
 
     const loadForce = async () => {
         setLoading(true);
@@ -83,7 +86,14 @@ const Forces = () => {
         return (
             <>
             {
-            loading === false ?
+                loading === false && quest[0] === 1 &&
+                <CheckQuest
+                    details={quest[1]}
+                    refresh={loadForce}
+                />
+            }
+            {
+            loading === false && (quest === 0 || (quest[1].quest_id === "1" && (quest[1].step_id === "8" || quest[1].step_id === "9"))) ?
                 <Row>
                     <Force
                         f="fspee"

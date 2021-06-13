@@ -713,6 +713,39 @@ class FightComponent extends Component
                     $member->skills->itl = rand(45,100);
                     $member->char->health = round(2333*$member->skills->level/100);
                 }
+                //stärkerer
+                elseif($member->skills->userid == 12) {
+                    $member->skills->level = rand($user_for_npc_1->skills->level,$user_for_npc_1->skills->level*1.2);
+					$member->skills->cns = rand($user_for_npc_1->skills->level*0.8,$user_for_npc_1->skills->level);
+                    $member->skills->tac = rand($user_for_npc_1->skills->level*0.7,$user_for_npc_1->skills->level*0.9);
+                    $member->skills->itl = rand($user_for_npc_1->skills->level*0.8,$user_for_npc_1->skills->level);
+					$member->skills->agi = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.8);
+					$member->skills->lsa = rand($user_for_npc_1->skills->level*0.8,$user_for_npc_1->skills->level);
+					$member->skills->lsd = rand($user_for_npc_1->skills->level*1.3,$user_for_npc_1->skills->level*1.5);
+					$member->skills->spi = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.8);
+					$member->skills->dex = rand($user_for_npc_1->skills->level*0.8,$user_for_npc_1->skills->level);
+                    $member->char->health = round(($member->skills->level * 2) + ($member->skills->cns * 3) + 20);
+					$member->char->mana = round(($member->skills->level * 1.5) + ($member->skills->spi * 4) + ($member->skills->itl / 2.5) + 10);
+					$member->wpn->mindmg = $user_for_npc_1->wpn->mindmg;
+					$member->wpn->maxdmg = round($user_for_npc_1->wpn->maxdmg*0.9);
+                }
+                //schwächerer
+                elseif($member->skills->userid == 11) {
+                    $member->skills->level = rand($user_for_npc_1->skills->level*0.8,$user_for_npc_1->skills->level);
+					$member->skills->cns = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.75);
+                    $member->skills->tac = rand($user_for_npc_1->skills->level*0.5,$user_for_npc_1->skills->level*0.65);
+                    $member->skills->itl = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.75);
+					$member->skills->agi = rand($user_for_npc_1->skills->level*0.4,$user_for_npc_1->skills->level*0.55);
+					$member->skills->lsa = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.75);
+					$member->skills->lsd = rand($user_for_npc_1->skills->level*1.1,$user_for_npc_1->skills->level*1.25);
+					$member->skills->spi = rand($user_for_npc_1->skills->level*0.4,$user_for_npc_1->skills->level*0.55);
+					$member->skills->dex = rand($user_for_npc_1->skills->level*0.6,$user_for_npc_1->skills->level*0.75);
+                    $member->char->health = round(($member->skills->level * 2) + ($member->skills->cns * 3) + 20);
+					$member->char->mana = round(($member->skills->level * 1.5) + ($member->skills->spi * 4) + ($member->skills->itl / 2.5) + 10);
+					$member->wpn->mindmg = round($user_for_npc_1->wpn->mindmg*0.8);
+					$member->wpn->maxdmg = round($user_for_npc_1->wpn->maxdmg*0.7);
+                }
+                //DROID
 				elseif($member->skills->level == 3)
                 {
                     $member->skills->level = $user_for_npc_1->skills->level;
@@ -4164,6 +4197,12 @@ class FightComponent extends Component
                 elseif($value->npc == "y" && $value->char->userid == 9) {
                     $p->killedReek += 1;
                 }
+                elseif($value->npc == "y" && $value->char->userid == 11) {
+                    $p->killedLeft += 1;
+                }
+                elseif($value->npc == "y" && $value->char->userid == 12) {
+                    $p->killedRight += 1;
+                }
 				
 				if ($i % 2 != 0) 
                 { 
@@ -4415,7 +4454,14 @@ class FightComponent extends Component
                                 $statistics->killedReek += $value->killedReek;
                                 $statistics->raidwins += 1;
                             }
-							
+                            elseif($npcid == 11) {
+                                $statistics->killedLeft += 1;
+                                $statistics->npcwins += 1;
+                            }
+							elseif($npcid == 12) {
+                                $statistics->killedRight += 1;
+                                $statistics->npcwins += 1;
+                            }
                         }
 
                         if (count($iteam) >= 1)
@@ -4453,7 +4499,13 @@ class FightComponent extends Component
 							{
 								$bonus_1 = $bonus_1 * 1.25;
 								$bonus_kill = round($value->skills->level * ($value->killedGiantRat) / 2);
-							}							
+							}
+                            elseif ($npcid == 11) {
+                                $bonus_1 = $bonus_1 * 0.8;
+                            }
+                            elseif ($npcid == 12) {
+                                $bonus_1 = $bonus_1 * 1.2;
+                            }							
                         }
                         $xpcalc = 20 + $value->skills->level + $bonus_1 + $neg_1 + $bonus_kill;
                         $xpcalc2 = rand($xpcalc - $value->skills->level, $xpcalc);
@@ -4579,7 +4631,7 @@ class FightComponent extends Component
                             $this->JediUserSkills->save($user->skills);
                             $this->JediUserStatistics->save($statistics);
 
-                            if($fight_data->type == "duelnpc" OR $fight_data->type == "coopnpc")
+                            if(($fight_data->type == "duelnpc" OR $fight_data->type == "coopnpc") AND $fight_data->type2 != "quest")
                             {
                                 //Jeder vom Gewinnerteam hat die chance auf ein loot
                                 $looting[$value->char->userid] = $this->looting($fight_data->type, $fight_data->type2, $npcid, $value->char->tmpcast, $value->char->userid, $value->char->username);
@@ -4705,6 +4757,9 @@ class FightComponent extends Component
                         elseif($npcid == 9) {
                             $statistics->killedReek += $value->killedReek;
                             $statistics->raidlosts += 1;
+                        }
+                        elseif($npcid == 11 OR $npcid == 12) {
+                            $statistics->npclosts += 1;
                         }
 						
                         
@@ -4895,7 +4950,7 @@ class FightComponent extends Component
 
         $md5 = md5(uniqid(rand()));
 
-        if($fight_data->type2 == "")
+        if($fight_data->type2 == "" OR $fight_data->type2 == "quest")
         {
             $db_fight_report = $this->JediFightReports->newEntity();
             $db_fight_report->zeit = time();
@@ -4959,10 +5014,15 @@ class FightComponent extends Component
             }
         }
         */
+        if($fight_data->type2 == "quest") {
+            return [$win, $loose, $fight_report];
+        }
         if(isset($loot))
         {
             return $loot;
-        }   
+        }
+        
+   
     //Ende Funktion fight()
     }
 
@@ -5001,11 +5061,11 @@ class FightComponent extends Component
             {
                 $lootitem = "rat";
             }
-			elseif($npcid == 1)
+			elseif($npcid == 1 OR $npcid == 11)
 			{
 				$lootitem = "giant-rat";
 			}
-			elseif($npcid == 8)
+			elseif($npcid == 8 OR $npcid == 12)
 			{
 				$lootitem = "droid";
 			}

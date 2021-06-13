@@ -18,6 +18,11 @@ class PreferencesController extends RestController
         parent::initialize();
 		$this->loadModel("JediUserChars");
 		$this->loadModel("JediUserSkills");
+		$this->loadModel("JediAlliances");
+		$this->loadModel("JediMasterrequestsText");
+		$this->loadModel("JediMasterrequests");
+		$this->user = $this->JediUserChars->get($this->Auth->User("id"));
+		$this->user->skills = $this->JediUserSkills->get($this->Auth->User("id"));
     }
 	
 	public function fight()
@@ -219,6 +224,105 @@ class PreferencesController extends RestController
 		$this->set("options",$options);
 		$this->set("def_options",$def_options);
 		$this->set("off_options",$off_options);
+	}
+
+	public function pada() {
+
+		$nomaster = null;
+		//wenn der User sich noch nicht entschieden hat
+		//sonst kann man sichs sparen
+		if($this->user->masterid == 0) {
+			//Wer hat ein request gestellt?
+			$all = $this->JediMasterrequestsText->find()->toArray();
+			$padas = [];
+			$masters = [];
+			$alliance = [];
+
+			foreach ($all as $key => $value) {
+
+				$skills = $this->JediUserSkills->find()->select(["userid","level","side"])->where(["userid" => $value->requester])->first();
+				$char = $this->JediUserChars->find()->select(["userid","username","alliance","sex","species", "homeworld"])->where(["userid" => $value->requester])->first();
+				//checken ob ich ein request habe
+				$reqToMe = $this->JediMasterrequests->find()->where(["requester" => $value->requester])->where(["receiver" => $this->user->userid])->first();
+				//infos bei möglicher allianz holen
+				if($value->alliance != "0") {
+					$alliance = $this->JediAlliances->find()->select(["name","short"])->where(["id" => $char->alliance])->first();
+				}
+				else {
+					$alliance = [];
+				}
+
+				//aktivitätspunkte
+				$value->activePoints = $this->activePoints($value->requester);
+
+				if($skills->level < 75) {
+					$padas[$key] = $value;
+					$padas[$key]->allianceData = $alliance;
+					$padas[$key]->skills = $skills;
+					$padas[$key]->char = $char;
+					$padas[$key]->reqToMe = $reqToMe;
+				}
+				else {
+					$masters[$key] = $value;
+					$masters[$key]->allianceData = $alliance;
+					$masters[$key]->skills = $skills;
+					$masters[$key]->char = $char;
+					$masters[$key]->reqToMe = $reqToMe;
+				}
+			}
+			usort($padas, function($a, $b) {
+				return $a->skills->level <=> $b->skills->level;
+			});
+			usort($masters, function($a, $b) {
+				return -1 * ($a->skills->level <=> $b->skills->level);
+			});
+			$nomaster = true;
+			$this->set("level",$this->user->skills->level);
+			$this->set("padas",$padas);
+			$this->set("masters",$masters);
+		}
+
+		//wenn der User bereits einen Meister/Schüler hat
+		if($this->user->masterid != 0) {
+
+			$nomaster = false;
+		}
+		$this->set("nomaster",$nomaster);
+	}
+
+	public function forfeit($id) {
+		$masterRequest = $this->JediMasterrequests->get($id);
+		$masterRequest->status = 2;
+		$this->JediMasterrequests->save($masterRequest);
+	}
+//////////////////////////////////////////////////////////////////////////////////////////
+	private function activePoints($userid) {
+		//aktivitätspunkte berechnen
+		$this->loadModel("Accounts");
+
+		$char = $this->JediUserChars->get($userid);
+		$char->skills = $this->JediUserSkills->get($userid);
+
+		//base aktivität
+		$active = 100;
+
+		//abzug wg. nicht vergebener skillpunkte
+		if($char->skills->rfp > 0 || $char->skills->rsp > 0) {
+			$active -= 5;
+		}
+
+		//abzug wg. langer offline zeit
+		//get last login
+		$lastLogin = date_create($this->Accounts->get($userid)->last_activity->format("Y-m-d"));
+		$now = date_create();
+		$dateDiff = date_diff($now,$lastLogin)->days;
+
+		$active -= $dateDiff;
+
+		if($active < 0) {
+			$active = 0;
+		}
+		return $active;
 	}
 }
 ?>

@@ -251,6 +251,8 @@ class TreasureComponent extends Component
                 $item_db->weight = $weight;
                 $item_db->price = $price;
                 $item_db->crafed = 0;
+                $item_db->mindmg = 0;
+                $item_db->maxdmg = 0;
                 $item_db->stat1 = $stat1;
                 $item_db->stat2 = $stat2;
                 $item_db->stat3 = $stat3;
@@ -275,6 +277,8 @@ class TreasureComponent extends Component
                 $item_db->weight = $weight;
                 $item_db->price = $price;
                 $item_db->crafed = 0;
+                $item_db->mindmg = 0;
+                $item_db->maxdmg = 0;
                 $item_db->stat1 = $stat1;
                 $item_db->stat2 = $stat2;
                 $item_db->stat3 = $stat3;
@@ -544,7 +548,7 @@ class TreasureComponent extends Component
             }
 		}
 		
-		if($type_of_creation != "price")
+		if($type_of_creation != "price" OR $type_of_creation != "box")
 		{
 			$statistics = $this->JediUserStatistics->get($userid);
             if($lootitem != "giant-rat" && $lootitem != "reek") {

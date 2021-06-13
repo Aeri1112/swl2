@@ -113,7 +113,7 @@ const Preferences = () => {
                             </Form.Control>
                         </Form.Group>
                         <Form.Group controlId="preferedoff">
-                            <Form.Label>bevorzugte Defensivmacht</Form.Label>
+                            <Form.Label>bevorzugte Offensivmacht</Form.Label>
                             <Form.Control onChange={handleChange} value={formData.preferedoff} name="preferedoff" as="select" custom>
                                 {Object.keys(response.off_options).map((element) => {
                                     return <option key={element} value={`${element}`}>{response.off_options[element]}</option>
