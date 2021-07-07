@@ -15,16 +15,7 @@ use Cake\Http\ServerRequest;
  * @method \App\Model\Entity\Account[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
 class AccountsController extends AppController
-{
-    public function beforeFilter(\Cake\Event\EventInterface $event)
-    {
-        parent::beforeFilter($event);
-        // Configure the login action to not require authentication, preventing
-        // the infinite redirect loop issue
-        $this->Authentication->addUnauthenticatedActions(['login', 'add']);
-        $this->Authentication->allowUnauthenticated(['login', 'add']);
-    }
-    
+{    
     public function login()
     {   
         $this->viewBuilder()->setLayout('react');

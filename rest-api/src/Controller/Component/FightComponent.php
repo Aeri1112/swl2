@@ -98,14 +98,16 @@ class FightComponent extends Component
                 $member->tempBonusForces = $this->Bonus->tempBonusForces($this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $member->userid]),$this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $member->userid]));
             
                 //Meister/Pada XP Bonus
-                //Ich bin größer 85 und habe keine 0 als masterid bedeutet ich bin ein Meister und habe einen Schüler
-                if($member->skills->level >= 85 && $member->char->masterid != 0)
+                //Ich bin größer 75 und habe keine 0 als masterid bedeutet ich bin ein Meister und habe einen Schüler
+                //ich bin der meister
+                if($member->skills->level >= 75 && $member->char->masterid != 0)
                 {
                     $member->char->meisterid = $member->userid;
                     $member->char->padaid = $member->char->masterid;
                     $member->tempBonus["tmppxp"] = $member->tempBonus["tmppxp"] + 3;
                 }
-                elseif($member->skills->level >= 85 && $member->char->masterid != 0)
+                //ich bin der Pada
+                elseif($member->skills->level < 75 && $member->char->masterid != 0)
                 {
                     $member->char->meisterid = $member->char->masterid;
                     $member->char->padaid = $member->userid;
@@ -4605,22 +4607,24 @@ class FightComponent extends Component
                             }
                         }
                 
-                        if ($value->padawanid == $value->char->userid) 
+                        if ($value->char->padaid == $value->char->userid) 
                         {
-                            $userid = $value->char->masterid;
+                            $meister = $this->JediUserSkills->get($value->char->meisterid);
                             $xp = $xp * 5 / 100;
                             if ($value->npc == "n") 
                             {
-                                $user->skills->xp += $xp; 
+                                $meister->xp += $xp; 
+                                $this->JediUserSkills->save($meister);
                             }
                         }
-                        elseif ($value->masterid == $value->char->userid)
+                        elseif ($value->char->meisterid == $value->char->userid)
                         {
-                            $userid = $value->padawanid;
+                            $pada = $this->JediUserSkills->get($value->char->padaid);
                             $xp = $xp * 3 / 100;
                             if ($value->npc == "n") 
                             {
-                                $user->skills->xp += $xp;
+                                $pada->xp += $xp;
+                                $this->JediUserSkills->save($pada);
                             }
                         }
 
@@ -4862,22 +4866,25 @@ class FightComponent extends Component
                             $user->mana = $mana;
                         }
                     }
-                    if ($value->padawanid == $value->char->userid) 
+
+                    if ($value->char->padaid == $value->char->userid) 
                     {
-                        $userid = $value->char->masterid;
+                        $meister = $this->JediUserSkills->get($value->char->meisterid);
                         $xp = $xp * 5 / 100;
                         if ($value->npc == "n") 
                         {
-                            $user->skills->xp += $xp; 
+                            $meister->xp += $xp; 
+                            $this->JediUserSkills->save($meister);
                         }
                     }
-                    elseif ($value->char->masterid == $value->char->userid) 
+                    elseif ($value->char->meisterid == $value->char->userid)
                     {
-                        $userid = $value->padawanid;
+                        $pada = $this->JediUserSkills->get($value->char->padaid);
                         $xp = $xp * 3 / 100;
                         if ($value->npc == "n") 
                         {
-                            $user->skills->xp += $xp;
+                            $pada->xp += $xp;
+                            $this->JediUserSkills->save($pada);
                         }
                     }
 

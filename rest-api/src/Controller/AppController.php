@@ -44,6 +44,10 @@ class AppController extends Controller
         $this->loadComponent('RequestHandler', [
             'enableBeforeRedirect' => false,
         ]);
+
+        //07.07.2021
+        //$this->loadComponent('Authentication.Authentication');
+        /* 07.07.2021
         $this->loadComponent('Flash');
 
         $this->loadComponent('Auth', [
@@ -61,6 +65,8 @@ class AppController extends Controller
              // If unauthorized, return them to page they were just on
             'unauthorizedRedirect' => false
         ]);
+        */
+
 
         // Allow the display action so our PagesController
         // continues to work. Also enable the read only actions.

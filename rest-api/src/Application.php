@@ -22,6 +22,11 @@ use Cake\Http\BaseApplication;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
 use App\Middleware\httpOptionsMiddleware;
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Application setup class.
@@ -29,7 +34,7 @@ use App\Middleware\httpOptionsMiddleware;
  * This defines the bootstrapping logic and middleware layers you
  * want to use in your application.
  */
-class Application extends BaseApplication
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
      * {@inheritDoc}
@@ -42,6 +47,8 @@ class Application extends BaseApplication
 
         // Call parent to load bootstrap from files.
         parent::bootstrap();
+
+        $this->addPlugin('Authentication');
 
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
@@ -56,6 +63,33 @@ class Application extends BaseApplication
         }
 
         // Load more plugins here
+    }
+
+    public function getAuthenticationService(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        $service = new AuthenticationService();
+        $service->setConfig([
+            'unauthenticatedRedirect' => '/test/login',
+            'queryParam' => 'redirect',
+        ]);
+
+        $fields = [
+            'username' => 'accountname',
+            'password' => 'password'
+        ];
+
+        // Load identifiers
+        $service->loadIdentifier('Authentication.Password', compact('fields'));
+
+        // Load the authenticators, you want session first
+        $service->loadAuthenticator('Authentication.Form', [
+            'fields' => $fields,
+            'loginUrl' => '/test/login'
+        ]);
+
+        return $service;
+
+        return $service;
     }
 
     /**
@@ -86,6 +120,15 @@ class Application extends BaseApplication
             // `new RoutingMiddleware($this, '_cake_routes_')`
             ->add(new RoutingMiddleware($this));
 
+            /*
+            // Create an authentication middleware object
+            $authentication = new AuthenticationMiddleware($this);
+
+            // Add the middleware to the middleware queue.
+            // Authentication should be added *after* RoutingMiddleware.
+            // So that subdirectory information and routes are loaded.
+            $middlewareQueue->add($authentication);
+            */
         return $middlewareQueue;
     }
 

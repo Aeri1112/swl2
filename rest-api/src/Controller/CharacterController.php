@@ -13,7 +13,7 @@ class CharacterController extends RestController {
     {
         parent::initialize();
         $this->loadComponent('maxHealth');
-        $this->loadComponent("Quest");
+        $this->loadComponent("Quest", ["token" => $this->token, "payload" => $this->payload]);
         $this->loadModel("JediUserChars");
     }
 
@@ -82,25 +82,31 @@ class CharacterController extends RestController {
 
     public function overview()
     {			
+        $token = $this->token;
+
+        $payload = $this->payload;
+        $this->set("token",$token);
+        $this->set("payload",$payload->id);
+        
 		$this->LoadModel('JediUserChars');  
-        $char = $this->JediUserChars->get($this->Auth->User("id"));
+        $char = $this->JediUserChars->get($payload->id);
         $this->set('char',$char);
 
         $this->LoadModel('JediUserSkills');  
-        $skills = $this->JediUserSkills->get($this->Auth->User("id"));
+        $skills = $this->JediUserSkills->get($payload->id);
 
         $this->LoadModel('JediItemsJewelry');
-        $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);
+        $jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $payload->id]);
         
         $this->LoadModel('JediItemsWeapons');
-        $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->Auth->User("id")]);        
+        $weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $payload->id]);        
 
         //set location
 		$char->location = "Overview";
 		$this->JediUserChars->save($char);
 		//pruefe auf quest
 		$this->Quest->aktiviere_quest();
-		$quest_comp = $this->Quest->pruefe_auf_quests($this->Auth->User("id"), $char->location);
+		$quest_comp = $this->Quest->pruefe_auf_quests($payload->id, $char->location);
 		if($char->actionid != 0 || $char->targetid != 0 || $char->targettime != 0) {
 			$this->set("quest",0);
 		}

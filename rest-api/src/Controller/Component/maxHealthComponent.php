@@ -183,11 +183,11 @@ class maxHealthComponent extends Component
                 }
                 }
                 }
-            $array = array("tmphealth" => "$tmphealth", "lhealth" => "$lhealth", "phealth" => "$phealth",
-                            "tmpmana" => "$tmpmana", "lmana" => "$lmana", "pmana" => "$pmana", "tmpcns" => "$tmpcns",
-                            "tmpspi" => "$tmpspi", "tmpitl" => "$tmpitl", "tmpagi" => "$tmpagi", "tmptac" => "$tmptac",
-                            "tmpdex" => "$tmpdex", "tmplsa" => "$tmplsa", "tmplsd" => "$tmplsd", "tmpxp" => "$tmpxp",
-                            "tmplxp" => "$tmplxp", "tmppxp" => "$tmppxp");
+            $array = array("tmphealth" => $tmphealth, "lhealth" => $lhealth, "phealth" => $phealth,
+                            "tmpmana" => $tmpmana, "lmana" => $lmana, "pmana" => $pmana, "tmpcns" => $tmpcns,
+                            "tmpspi" => $tmpspi, "tmpitl" => $tmpitl, "tmpagi" => $tmpagi, "tmptac" => $tmptac,
+                            "tmpdex" => $tmpdex, "tmplsa" => $tmplsa, "tmplsd" => $tmplsd, "tmpxp" => $tmpxp,
+                            "tmplxp" => $tmplxp, "tmppxp" => $tmppxp);
             return $array;        
         }
 

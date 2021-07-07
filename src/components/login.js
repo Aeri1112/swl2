@@ -36,7 +36,7 @@ export default function Login() {
       const data = await POST('/test/login', {accountname: email, password: password})
       if(data) {
         setLoading(false)
-        dispatch({type:"IS_AUTH",payload:{isAuth:"true",userId:data.user.id, username:data.username.username}});
+        dispatch({type:"IS_AUTH",payload:{isAuth:"true",userId:data.user, username:data.username.username}});
         setJwtToken(data.token)
         setData(data)
       }
@@ -92,6 +92,13 @@ const handleDat = (state) => {
             latest Updates
           </div>
           <div className="update border">
+            Ein paar Account-Einstellungen sind nun möglich<br/>
+            Einen Drink für 100 % Mana <br/>
+            Meister-/Padawan System <br/>
+            weitere kleinere Verbesserungen
+            <footer className="blockquote-footer text-white">29.06.2021</footer>
+          </div>
+          <div className="update border">
             Eine Möglichkeit gegen stärke, dem Spieler angepasste, NPC's zu käpfen wurde hinzugefügt<br/>
             weitere kleinere Verbesserungen
             <footer className="blockquote-footer text-white">25.05.2021</footer>
@@ -101,12 +108,14 @@ const handleDat = (state) => {
             kleinere Verbesserungen
             <footer className="blockquote-footer text-white">09.04.2021</footer>
           </div>
+          {/*
           <div className="update border">
             Refresh-Button in der Arena<br/>
             Anzeige der aktuellen Aktion in der Charakter-Übersicht<br/>
             kleinere Verbesserung (z.B. Countdown)
             <footer className="blockquote-footer text-white">07.03.2021</footer>
           </div>
+          */}
           {/*
           <div className="update border">
             Erweiterung der Server-Statistik <br/>

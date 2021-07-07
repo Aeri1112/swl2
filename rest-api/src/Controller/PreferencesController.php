@@ -2,6 +2,7 @@
 namespace App\Controller;
 use Cake\Event\EventInterface;
 use Rest\Controller\RestController;
+use Cake\I18n\Time;
 
 
 /**
@@ -21,6 +22,11 @@ class PreferencesController extends RestController
 		$this->loadModel("JediAlliances");
 		$this->loadModel("JediMasterrequestsText");
 		$this->loadModel("JediMasterrequests");
+		$this->loadModel("JediUserStatistics");
+		$this->LoadModel('JediItemsJewelry');
+		$this->LoadModel('JediItemsWeapons');
+        $this->loadComponent('maxHealth');
+
 		$this->user = $this->JediUserChars->get($this->Auth->User("id"));
 		$this->user->skills = $this->JediUserSkills->get($this->Auth->User("id"));
     }
@@ -229,7 +235,9 @@ class PreferencesController extends RestController
 	public function pada() {
 
 		$nomaster = null;
-		//wenn der User sich noch nicht entschieden hat
+		$req = $this->JediMasterrequestsText->find()->where(["requester" => $this->user->userid])->first();
+		$this->set("req",$req);
+		//wenn der User noch kein Gesuch abgesetzt hat
 		//sonst kann man sichs sparen
 		if($this->user->masterid == 0) {
 			//Wer hat ein request gestellt?
@@ -244,6 +252,8 @@ class PreferencesController extends RestController
 				$char = $this->JediUserChars->find()->select(["userid","username","alliance","sex","species", "homeworld"])->where(["userid" => $value->requester])->first();
 				//checken ob ich ein request habe
 				$reqToMe = $this->JediMasterrequests->find()->where(["requester" => $value->requester])->where(["receiver" => $this->user->userid])->first();
+				//checken ob ich ein request gesendet habe
+				$reqFromMe = $this->JediMasterrequests->find()->where(["requester" => $this->user->userid])->where(["receiver" => $value->requester])->first();
 				//infos bei möglicher allianz holen
 				if($value->alliance != "0") {
 					$alliance = $this->JediAlliances->find()->select(["name","short"])->where(["id" => $char->alliance])->first();
@@ -261,6 +271,7 @@ class PreferencesController extends RestController
 					$padas[$key]->skills = $skills;
 					$padas[$key]->char = $char;
 					$padas[$key]->reqToMe = $reqToMe;
+					$padas[$key]->reqFromMe = $reqFromMe;
 				}
 				else {
 					$masters[$key] = $value;
@@ -268,6 +279,7 @@ class PreferencesController extends RestController
 					$masters[$key]->skills = $skills;
 					$masters[$key]->char = $char;
 					$masters[$key]->reqToMe = $reqToMe;
+					$masters[$key]->reqFromMe = $reqFromMe;
 				}
 			}
 			usort($padas, function($a, $b) {
@@ -280,6 +292,41 @@ class PreferencesController extends RestController
 			$this->set("level",$this->user->skills->level);
 			$this->set("padas",$padas);
 			$this->set("masters",$masters);
+		}
+		//Wenn ich einen Meister/Pada habe
+		else {
+			$masterPada = $this->JediUserChars->get($this->user->masterid);
+			//aktivitätspunkte
+			$masterPada->activePoints = $this->activePoints($this->user->masterid);
+			//Abis
+			$masterPada->abis = $this->JediUserSkills->find()->select(["cns","agi","lsa","lsd","dex","tac","spi","itl"])->where(["userid" => $this->user->masterid])->first();
+			//Forces
+			$masterPada->forces = $this->JediUserSkills->find()->select(["fspee", "fjump", "fseei", "fpush", "fpull", "fsabe", "fproj", "fpers", "fblin", "fconf", "fheal", "fteam", "fprot", "fabso", "fthro", "frage", "fgrip", "fdrai", "fthun", "fchai", "fdead", "fdest", "ftnrg", "frvtl"])
+									->where(["userid" => $this->user->masterid])->first();
+
+			$jewelry_model = $this->JediItemsJewelry->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->user->masterid]);
+			$weapons_model = $this->JediItemsWeapons->find()->select(['stat1', 'stat2', 'stat3', 'stat4', 'stat5'])->where(['position' => 'eqp', 'ownerid' => $this->user->masterid]);
+			$masterPada->tempBonusForces = $this->maxHealth->tempBonusForces($jewelry_model, $weapons_model); 
+			$masterPada->tempBonus = $this->maxHealth->tempBonus($jewelry_model, $weapons_model);
+			//für allgemeine skills
+			$masterPada->skills = $this->JediUserSkills->get($this->user->masterid);
+			//statistics
+			$masterPada->stats = $this->JediUserStatistics->get($this->user->masterid);
+			$masterPada->stats->npcPer = round($masterPada->stats->npcwins * 100 / ($masterPada->stats->npcwins + $masterPada->stats->npclosts),2);
+			$masterPada->stats->arenaPer = round($masterPada->stats->arenawins * 100 / ($masterPada->stats->arenawins + $masterPada->stats->arenalosts),2);
+			//infos bei möglicher allianz holen
+			if($masterPada->alliance != "0") {
+				$alliance = $this->JediAlliances->find()->select(["name","short"])->where(["id" => $masterPada->alliance])->first();
+			}
+			else {
+				$alliance = [];
+			}
+			$masterPada->alliance = $alliance;
+
+			$now = new Time($this->Accounts->get($this->user->masterid)->last_activity);
+			$masterPada->account = $now->i18nFormat('yyyy, LLLL', null, "de-DE");
+
+			$this->set("masterPada",$masterPada);
 		}
 
 		//wenn der User bereits einen Meister/Schüler hat
@@ -294,6 +341,63 @@ class PreferencesController extends RestController
 		$masterRequest = $this->JediMasterrequests->get($id);
 		$masterRequest->status = 2;
 		$this->JediMasterrequests->save($masterRequest);
+	}
+
+	public function accept($id) {
+		//nochmal checken ob nicht einer schneller war
+		$masterRequest = $this->JediMasterrequests->get($id);
+		$user1 = $this->JediUserChars->get($masterRequest->requester);
+		$user2 = $this->JediUserChars->get($masterRequest->receiver);
+
+		if($user1->masterid == 0 && $user2->masterid == 0) {
+			//Meister/Pada setzten
+			$user1->masterid = $user2->userid;
+			$user2->masterid = $user1->userid;
+			
+			$this->JediUserChars->save($user1);
+			$this->JediUserChars->save($user2);
+			//Alle requests von und zu diesen beiden löschen.
+			$requests1 = $this->JediMasterrequests->find()->where(['OR' => [['requester' => $user1->userid], ['receiver' => $user1->userid]]]);
+			$requests1->delete()->execute();
+			$requests2 = $this->JediMasterrequests->find()->where(['OR' => [['requester' => $user2->userid], ['receiver' => $user2->userid]]]);
+			$requests2->delete()->execute();
+			//Die ANzeigen von beiden löschen.
+			$request1 = $this->JediMasterrequestsText->find()->where(["requester" => $user1->userid]);
+			$request2 = $this->JediMasterrequestsText->find()->where(["requester" => $user2->userid]);
+			if($request1) {
+				$request1->delete()->execute();
+			}
+			if($request2) {
+				$request2->delete()->execute();
+			}
+		}
+		else {
+			$this->set("late",true);
+		}
+	}
+
+	public function leave() {
+		$otherUser = $this->JediUserChars->get($this->user->masterid);
+		$otherUser->masterid = 0;
+		$this->user->masterid = 0;
+		$this->JediUserChars->save($otherUser);
+		$this->JediUserChars->save($this->user);
+	}
+
+	public function request($id) {
+		$request = $this->JediMasterrequests->newEntity();
+		$request->requester = $this->user->userid;
+		$request->receiver = $id;
+		$request->status = 1;
+		$this->JediMasterrequests->save($request);
+	}
+
+	public function offer() {
+		$data = $this->request->getData();
+		$offer = $this->JediMasterrequestsText->newEntity();
+		$offer->requester = $this->user->userid;
+		$offer->text = $data["text"];
+		$this->JediMasterrequestsText->save($offer);
 	}
 //////////////////////////////////////////////////////////////////////////////////////////
 	private function activePoints($userid) {
@@ -323,6 +427,75 @@ class PreferencesController extends RestController
 			$active = 0;
 		}
 		return $active;
+	}
+
+	public function account() {
+
+		//////////////////////////////MAIL///////////////////////////////////////
+		if($this->request->getData("mail")) {
+			//Email bereits verwendet?
+			$check_mail = null;
+			$check_mail = $this->loadModel("Accounts")->find()->where(["email" => $this->request->getData("mail")])->first();
+			$this->set("check",$check_mail);
+			if($check_mail == null) {
+				$account = $this->loadModel("Accounts")->get($this->user->userid);
+				$account->email = $this->request->getData("mail");
+				$this->loadModel("Accounts")->save($account);
+			}
+		}
+		/////////////////////////////PROFILBILD//////////////////////////////////////////
+		$message = "";
+		//if they DID upload a file...
+		if($_FILES && $_FILES['input']['name'])
+		{
+			$name = $_FILES['input']['name'];
+			$tmp_name = $_FILES['input']['tmp_name'];
+			$position = strpos($name, ".");
+			$fileextension = substr($name, $position + 1);
+			$fileextension = strtolower($fileextension);
+
+			//if no errors...
+			if(!$_FILES['input']['error'])
+			{
+				$valid_file = true;
+				//now is the time to modify the future file name and validate the file
+				//Date as hash
+				$now = Time::now()->i18nFormat("yyyyMMddHHmmss");
+				$new_file_name = strtolower($this->user->userid.$now.".".$fileextension); //rename file
+				if($_FILES['input']['size'] > (4096000)) //can't be larger than 1 MB
+				{
+					$valid_file = false;
+					$message = 'Oops! Your file\'s size is to large.';
+				}
+				if (($fileextension !== "jpg") && ($fileextension !== "jpeg") && ($fileextension !== "png") && ($fileextension !== "bmp"))
+				{
+					$valid_file = false;
+					$message = "The file extension must be .jpg, .jpeg, .png, or .bmp in order to be uploaded";
+				}
+
+				//if the file has passed the test
+				if($valid_file)
+				{
+					//checking if file exsists
+					if(file_exists($_SERVER["DOCUMENT_ROOT"].'/qyr/public/images/profile/'.$this->user->pic)) unlink($_SERVER["DOCUMENT_ROOT"].'/qyr/public/images/profile/'.$this->user->pic);
+					//move it to where we want it to be
+					if(move_uploaded_file($_FILES['input']['tmp_name'], $_SERVER["DOCUMENT_ROOT"].'/qyr/public/images/profile/'.$new_file_name)) {
+						$message = 'Congratulations! Your file was accepted.';
+						$this->user->pic = $new_file_name;
+						$this->JediUserChars->save($this->user);
+					}
+				}
+			}
+			//if there is an error...
+			else
+			{
+				//set that to be the returned message
+				$message = 'Ooops! Your upload triggered the following error: '.$_FILES['input']['error'];
+			}
+		}
+		$this->set("message",$message);
+		$this->set("char",$this->user);
+		$this->set("account",$this->loadModel("Accounts")->get($this->user->userid));
 	}
 }
 ?>

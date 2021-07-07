@@ -19,6 +19,7 @@ use Cake\I18n\FrozenTime;
 use Cake\Datasource\ConnectionManager;
 use Rest\Controller\RestController;
 use Rest\Utility\JwtToken;
+use Cake\Auth\DefaultPasswordHasher;
 
 /**
  * Das ist mein Rest Controller
@@ -45,26 +46,29 @@ class TestController extends RestController
      * http://localhost/test/login
      */
     public function login() {
-        $payload = [
-            'foo' => 'bar'
-        ];
-        // erstelle den jwt token mit dem obigen payload, kann man sich wie ne session datei vorstellen
-        // die eigenarten bei JWT musst die frontend seitig in der fetch.js ansehen.
-        $token = JwtToken::generate($payload);
-        $user = $this->Auth->identify();
-        if ($user) {
-            $this->Auth->setUser($user);
-            $this->set("user",$this->Auth->user());
-            $this->set(compact('token'));
 
+        //möglichen Account holen
+        $acc = $this->loadModel("Accounts")->find()->where(["accountname" => $this->request->getData("accountname")])->first();
+        $passhash = (new DefaultPasswordHasher)->check($this->request->getData("password"),$acc->password);
+
+        if ($passhash) {
+            $payload = [
+                'id' => $acc->id,
+                'accountname' => $acc->accountname
+            ];
+            // erstelle den jwt token mit dem obigen payload, kann man sich wie ne session datei vorstellen
+            // die eigenarten bei JWT musst die frontend seitig in der fetch.js ansehen.
+            $token = JwtToken::generate($payload);
+
+            $this->set(compact('token'));
+            $this->set("user",$acc->id);
             $connection = ConnectionManager::get('default');
-            $username = $connection->execute('SELECT username FROM jedi_user_chars WHERE userid = :id', ['id' => $_SESSION["Auth"]["User"]["id"]])->fetch('assoc');
+            $username = $connection->execute('SELECT username FROM jedi_user_chars WHERE userid = :id', ['id' => $acc->id])->fetch('assoc');
             $this->set("username",$username);
         }
         else {
             $this->set("error","wrong username or password");
         }
-        
     }
 
     /**

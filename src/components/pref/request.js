@@ -4,12 +4,15 @@ import { Col, Row, Button } from 'react-bootstrap';
 const Request = (props) => {
     const player = props.player;
     const forfeit = props.forfeit;
+    const accept = props.accept;
+    const request = props.request;
+
     return ( 
-        <div key={player.char.userid} className="col-md-6">
+        <div className="col-md-6">
             <div className="card user-card">
                 <div className="card-block">
                     <div className="user-image">
-                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" className="img-radius" alt="User-Profile-Image"/>
+                        <img src={`/images/profile/${player.char.userid}.jpg`} className="img-radius" alt="User-Profile-Image"/>
                     </div>
                     <h6 className="f-w-600 m-t-25 m-b-10">{player.char.username}</h6>
                     <p className="text-muted"> {player.char.species} | {player.char.sex === "m" ? "Male" : "Female"} | {player.char.homeworld}</p>
@@ -45,7 +48,7 @@ const Request = (props) => {
                             player.reqToMe !== null && player.reqToMe.status === 1 ?
                                 <Row>
                                     <Col md="auto">
-                                        <Button variant="success">Accept</Button>
+                                        <Button variant="success" onClick={() => accept(player.reqToMe.id)}>Accept</Button>
                                     </Col>
                                     <Col md="auto">
                                         <Button variant="danger" onClick={() => forfeit(player.reqToMe.id)}>Forfeit</Button>
@@ -59,9 +62,16 @@ const Request = (props) => {
                                     </Col>
                                 </Row>
                             :
+                                player.reqFromMe !== null && player.reqFromMe.status === 1 ?
                                 <Row>
                                     <Col md="auto">
-                                        <Button>Anfragen</Button>
+                                        <Button variant="primary" disabled>angefragt</Button>
+                                    </Col>
+                                </Row>
+                            :
+                                <Row>
+                                    <Col md="auto">
+                                        <Button onClick={() => request(player.char.userid)}>Anfragen</Button>
                                     </Col>
                                 </Row>
                         }

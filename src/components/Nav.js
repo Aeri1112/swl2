@@ -118,7 +118,7 @@ const Navi = () => {
               <LinkContainer to="/pada">
                 <NavDropdown.Item>Ausbildung</NavDropdown.Item>
               </LinkContainer>
-              <LinkContainer to="#">
+              <LinkContainer to="/account">
                 <NavDropdown.Item>Account</NavDropdown.Item>
               </LinkContainer>
             </NavDropdown>

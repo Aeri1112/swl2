@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {useSelector} from "react-redux";
 import SidebarChat from "./sidebarchat";
 import './sidebar.css';
-import {SearchOutlined} from "@material-ui/icons"
 import {firestore} from "../../tools/firebase";
 import { POST } from '../../tools/fetch';
 import { Button } from 'react-bootstrap';
@@ -32,7 +31,7 @@ const Sidebar = (props) => {
         // Add a new document with a generated id.
         firestore.collection("chats").add({
             name : [username, search],
-            members: [userid, searchedId]
+            members: [userid, +searchedId]
         })
         .then((docRef) => {
             props.setChat(docRef.id)

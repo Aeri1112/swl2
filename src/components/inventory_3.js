@@ -151,7 +151,9 @@ const Inventory = () => {
                 case "Rancor-Lootbox (S)":
                     lootItem = "ranc4"
                     break;
-            
+                case "Rancor-Lootbox (XL)":
+                    lootItem = "ranc7"
+                    break;
                 default:
                     break;
             }
@@ -159,6 +161,7 @@ const Inventory = () => {
             if(item) {
                 setRewardedItem(item.loot)
             }
+            loadEquip();
         }
     }
 
@@ -369,7 +372,7 @@ const Inventory = () => {
                             <tr className="small" key={item.itemid}>
                                 <td>
                                     {
-                                        item.reql < inv.char.skills.level && item.reqs < inv.char.skills.dex && inv.img !== "misc" ?
+                                        item.reql <= inv.char.skills.level && item.reqs <= inv.char.skills.dex && inv.img !== "misc" ?
                                             <Button
                                                 className="text-muted"
                                                 size="sm"
@@ -481,7 +484,7 @@ const Inventory = () => {
                 <ModalFooter>
                     {
                         Object.keys(rewardedItem).length === 0 ?
-                            <Button onClick={() => (consumeItem(consumedItem), loadEquip())}>
+                            <Button onClick={() => (consumeItem(consumedItem))}>
                                 open
                             </Button>
                         :   <Button onClick={() => (setItemModal(false), setRewardedItem({}))}>

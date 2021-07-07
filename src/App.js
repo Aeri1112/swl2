@@ -44,6 +44,7 @@ import Quest from "./components/quest/index";
 import Puzzle from "./components/puzzle/App";
 
 import { Row } from 'react-bootstrap';
+import Account from './components/pref/account';
 
 const App = () => {
 
@@ -83,6 +84,7 @@ const App = () => {
 
                       <Route path="/pref" component={Preferences}/>
                       <Route path="/pada" component={Pada}/>
+                      <Route path="/account" component={Account}/>
 
                       <Route path="/statistics" exact component={Stats}/>
                         <Route path="/statistics/players" component={Players} />

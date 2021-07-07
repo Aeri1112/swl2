@@ -20,6 +20,7 @@ class QuestComponent extends Component
 		$this->JediUserChars = TableRegistry::get("JediUserChars");
 		$this->JediItemsJewelry = TableRegistry::get("JediItemsJewelry");
 		$this->connection = ConnectionManager::get('default');
+		$this->payload = $this->config("payload");
     }
 	
 	public function aktiviere_quest()
@@ -28,14 +29,14 @@ class QuestComponent extends Component
 		
 		foreach($quests as $key => $quest)
 		{
-			$user_quest = $this->UserQuests->find()->where(["quest_id" => $quest->quest_id])->where(["user_id" => $_SESSION["Auth"]["User"]["id"]])->first();
+			$user_quest = $this->UserQuests->find()->where(["quest_id" => $quest->quest_id])->where(["user_id" => $this->payload->id])->first();
 			
 			//Wenn noch gar nichts in der DB
 			if($user_quest == null)
 			{
 				$user_quest = $this->UserQuests->newEntity();
 				$user_quest->quest_id = $quest->quest_id;
-				$user_quest->user_id = $_SESSION["Auth"]["User"]["id"];
+				$user_quest->user_id = $this->payload->id;
 				$user_quest->status = 0;
 				$this->UserQuests->save($user_quest);
 				//sowie alle steps einfügen
@@ -45,7 +46,7 @@ class QuestComponent extends Component
 				for ($i=1; $i < $quest_steps+1; $i++)
 				{ 
 					$steps = $this->UserQuestSteps->newEntity();
-					$steps->user_id = $_SESSION["Auth"]["User"]["id"];
+					$steps->user_id = $this->payload->id;
 					$steps->quest_id = $quest->quest_id;
 					$steps->step_id = $i;
 					$steps->status = 0;
@@ -54,12 +55,12 @@ class QuestComponent extends Component
 				
 			}
 			//Wenn startbedingung erfüllt status des quest auf 1 sowie des ersten steps
-			if($this->check_bedingung_quest($quest->quest_id, $_SESSION["Auth"]["User"]["id"]) == true && $user_quest->status == 0)
+			if($this->check_bedingung_quest($quest->quest_id, $this->payload->id) == true && $user_quest->status == 0)
 			{
 				$user_quest->status = 1;
 				//Und den ersten Step auf 1 setzen
 				$steps = $this->UserQuestSteps->newEntity();
-				$steps->user_id = $_SESSION["Auth"]["User"]["id"];
+				$steps->user_id = $this->payload->id;
 				$steps->quest_id = $quest->quest_id;
 				$steps->step_id = 1;
 				$steps->status = 1;

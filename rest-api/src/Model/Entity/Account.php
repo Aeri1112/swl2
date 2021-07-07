@@ -40,10 +40,11 @@ class Account extends Entity
      *
      * @var array
      */
+    /*
     protected $_hidden = [
         'password',
     ];
-    
+    */
     protected function _setPassword($password)
     {
         if (strlen($password) > 0) {
